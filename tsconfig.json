@@ -6,6 +6,6 @@
         "moduleResolution": "Node",
         "sourceMap": false,
         "declaration": true,
-    },
-    "lib": ["es2015"]
+        "lib": ["ES2015"]
+    }
 }

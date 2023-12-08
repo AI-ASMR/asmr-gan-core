@@ -4,7 +4,9 @@
         "asmr",
         "CUDA",
         "gbprc",
+        "npmjs",
         "pargv",
+        "preinstall",
         "StiliyanKushev"
     ]
 }
