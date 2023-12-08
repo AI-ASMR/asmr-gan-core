@@ -1,4 +1,4 @@
-name: Git version publish on version bump.
+name: Git version publish on version bump
 
 on:
   push:
@@ -27,5 +27,7 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Increment version
+    - name: Increment version and publish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: npm run publish.git
