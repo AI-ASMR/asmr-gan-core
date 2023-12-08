@@ -1,5 +1,7 @@
 name: Node.js Version Bump On Major Changes
 
+permissions: write-all
+
 on:
   push:
     branches:
@@ -15,6 +17,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        # We need to use PAT alongside this
+        # see: https://github.com/orgs/community/discussions/26220
+        persist-credentials: false
+
+    - name: Configure Git
+      run: |
+        git config user.email "${{ github.actor }}@users.noreply.github.com"
+        git config user.name "${{ github.actor }}"
 
     - name: Setup Node.js
       uses: actions/setup-node@v2
@@ -25,4 +36,6 @@ jobs:
       run: npm ci
 
     - name: Increment version
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
       run: npm run inc.ver

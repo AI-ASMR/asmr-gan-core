@@ -39,13 +39,13 @@ const registeredCommands = new Map();
  * @example `npm run inc.ver`
  */
 registerCommand('inc.ver', (manualVersion = undefined) => {
-    const curVersion = fs.readFileSync('./version.cfg').toString();
+    const curVersion = fs.readFileSync('./version.cfg').toString().replaceAll('\n','');
     const newVersion = manualVersion || (() => {
         const [patch, major, minor] = curVersion.split('.').map(Number);
         return `${patch}.${major}.${minor+1}`;
     })();
     
-    if(!/^[0-9]+\.[0-9]\.[0-9]$/.test(newVersion)) {
+    if(!/^[0-9]+\.[0-9]+\.[0-9]+$/.test(newVersion)) {
         console.log('Invalid new version given.', newVersion);
         process.exit(1);
     }
@@ -55,6 +55,12 @@ registerCommand('inc.ver', (manualVersion = undefined) => {
         console.log('current version', curVersion);
         console.log('new version', newVersion);
         process.exit(1);
+    }
+
+    // detect action self-trigger loop and break it
+    const lastCommit = exec('git log -1 --oneline', { stdio: 'pipe' }).toString();
+    if(!manualVersion && lastCommit.includes('feat!: version bump')) {
+        return;
     }
 
     // update the version.cfg file
@@ -72,7 +78,15 @@ registerCommand('inc.ver', (manualVersion = undefined) => {
     exec('git add ./src/package-lock.json');
     exec('git add ./version.cfg');
     exec('git commit -m "feat!: version bump"');
-    exec('git push');
+
+    // ci/cd
+    if(process.env.GITHUB_TOKEN) {
+        exec(`git push https://${process.env.GITHUB_TOKEN}@github.com/AI-ASMR/asmr-gan-core.git main`);
+    }
+    // manual/local
+    else {
+        exec('git push');
+    }
 });
 
 /**
@@ -233,7 +247,7 @@ registerCommand('publish.lib', async () => {
  */
 registerCommand('publish.git', async () => {
     console.log('Publishing current version to git...');
-    const version = fs.readFileSync('./version.cfg').toString();
+    const version = fs.readFileSync('./version.cfg').toString().replaceAll('\n','');
     /**
      * @note 
      * Make sure the bin folder contains only the latest

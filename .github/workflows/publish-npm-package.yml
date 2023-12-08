@@ -1,4 +1,4 @@
-name: Git version publish on version bump
+name: NPM package publish on version bump
 
 permissions: write-all
 
@@ -41,4 +41,4 @@ jobs:
     - name: Publish the new version
       env:
         GITHUB_TOKEN: ${{ secrets.PAT }}
-      run: npm run publish.git
+      run: npm run publish.lib -- ${{ secrets.NPM_TOKEN }}
