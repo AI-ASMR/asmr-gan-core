@@ -28,7 +28,7 @@ const registeredCommands = new Map();
  * @throws When an invalid version is given.
  * @throws When a lower version is given then the current one.
  * 
- * @note CI/CD runs this on every pushed change to ./lib or ./src.
+ * @note CI/CD runs this on every pushed change to ./lib, ./src or ./common.
  * @note This triggers other CI/CD-controlled calls to registered 
  * commands. 
  * @see registerCommand('publish.git')
