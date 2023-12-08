@@ -3,12 +3,13 @@
     "version": "1.0.0",
     "description": "",
     "scripts": {
-        "build-lib": "echo 'Todo'",
-        "build-bin": "echo 'Todo'",
-        "docs-lib": "echo 'Todo'",
-        "docs-bin": "echo 'Todo'",
-        "test-lib": "echo 'Todo'",
-        "test-bin": "echo 'Todo'"
+        "preinstall": "node ./scripts.js --prepare.lib --prepare.bin",
+        "build.lib": "node ./scripts.js --build.lib",
+        "build.bin": "node ./scripts.js --build.bin",
+        "docs.lib": "node ./scripts.js --docs.lib",
+        "docs.bin": "node ./scripts.js --docs.bin",
+        "test.lib": "node ./scripts.js --test.lib",
+        "test.bin": "node ./scripts.js --test.bin"
     },
     "author": "Stiliyan Kushev",
     "license": "ISC",
