@@ -1,6 +1,6 @@
 {
-  "name": "lib",
-  "version": "1.0.0",
+  "name": "@aimr/asmr-gan-lib",
+  "version": "1.0.5",
   "description": "",
   "main": ".out/index.js",
   "scripts": {
