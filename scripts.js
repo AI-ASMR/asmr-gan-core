@@ -34,6 +34,8 @@ const registeredCommands = new Map();
  * @see registerCommand('publish.git')
  * @see registerCommand('publish.lib')
  * 
+ * @see '.github\workflows\version-bump.yml'
+ * 
  * @example `npm run inc.ver`
  */
 registerCommand('inc.ver', (manualVersion = undefined) => {
@@ -224,6 +226,8 @@ registerCommand('publish.lib', async () => {
  * @note Requires `gh` to be installed. @see https://man.archlinux.org/man/gh
  * @note Requires either GH-TOKEN or `gh auth login` (if ran locally).
  * @note CI/CD runs this on every version bump. @see registerCommand('inc.ver')
+ * 
+ * @see '.github\workflows\publish-git-version.yml'
  * 
  * @example `npm run publish.git`
  */

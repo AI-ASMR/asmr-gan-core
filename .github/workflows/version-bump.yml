@@ -21,11 +21,6 @@ jobs:
       with:
         node-version: '18.19.0'
 
-    - name: Install GitHub CLI
-      run: |
-        sudo apt update
-        sudo apt install gh
-
     - name: Install dependencies
       run: npm ci
 
