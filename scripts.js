@@ -25,6 +25,9 @@ const registeredCommands = new Map();
  * Used to automatically increment the (minor) version of the
  * entire repository, and bumps changes to git.
  * 
+ * @throws When an invalid version is given.
+ * @throws When a lower version is given then the current one.
+ * 
  * @note CI/CD runs this on every pushed change to ./lib or ./src.
  * @note This triggers other CI/CD-controlled calls to registered 
  * commands. 
@@ -33,16 +36,31 @@ const registeredCommands = new Map();
  * 
  * @example `npm run inc.ver`
  */
-registerCommand('inc.ver', () => {
-    const text = fs.readFileSync('./version.cfg').toString();
-    const [patch, major, minor] = text.split('.').map(Number);
-    const newVersion = `${patch}.${major}.${minor+1}`;
+registerCommand('inc.ver', (manualVersion = undefined) => {
+    const curVersion = fs.readFileSync('./version.cfg').toString();
+    const newVersion = manualVersion || (() => {
+        const [patch, major, minor] = curVersion.split('.').map(Number);
+        return `${patch}.${major}.${minor+1}`;
+    })();
+    
+    if(!/^[0-9]+\.[0-9]\.[0-9]$/.test(newVersion)) {
+        console.log('Invalid new version given.', newVersion);
+        process.exit(1);
+    }
+
+    if([curVersion, newVersion].sort().pop() == curVersion) {
+        console.log('New version is lower than current version.');
+        console.log('current version', curVersion);
+        console.log('new version', newVersion);
+        process.exit(1);
+    }
+
     // update the version.cfg file
     fs.writeFileSync('./version.cfg', newVersion);
     // update all package.json files
-    exec(`npm version ${newVersion}`);
-    exec(`npm version ${newVersion}`, { cwd: './lib' });
-    exec(`npm version ${newVersion}`, { cwd: './src' });
+    exec(`npm version ${newVersion}`, {}, true);
+    exec(`npm version ${newVersion}`, { cwd: './lib' }, true);
+    exec(`npm version ${newVersion}`, { cwd: './src' }, true);
     // commit new version to repo
     exec('git add ./package.json');
     exec('git add ./package-lock.json');
@@ -53,6 +71,23 @@ registerCommand('inc.ver', () => {
     exec('git add ./version.cfg');
     exec('git commit -m "feat!: version bump"');
     exec('git push');
+});
+
+/**
+ * @summary
+ * Useful when you want to manually set the version to a
+ * specific version. One reason you might want to do that
+ * is to increment the `patch` or `major` parts of the
+ * version instead of just the `minor` version which is
+ * automatically increment by @see registerCommand('inc.ver')
+ * 
+ * @throws When an invalid version is given.
+ * 
+ * @example `npm run set.ver -- 1.2.3`
+ */
+registerCommand('set.ver', () => {
+    const newVersion = process.argv.pop();
+    executeCommand('inc.ver', [newVersion]);
 });
 
 /**
