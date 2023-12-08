@@ -1,5 +1,5 @@
 {
-  "name": "asmr-gan-src",
+  "name": "asmr-gan-bin",
   "version": "1.0.0",
   "description": "",
   "main": ".out/index.js",

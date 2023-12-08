@@ -9,7 +9,8 @@
         "docs.lib": "node ./scripts.js --docs.lib",
         "docs.bin": "node ./scripts.js --docs.bin",
         "test.lib": "node ./scripts.js --test.lib",
-        "test.bin": "node ./scripts.js --test.bin"
+        "test.bin": "node ./scripts.js --test.bin",
+        "start": "node ./scripts.js --run.bin"
     },
     "author": "Stiliyan Kushev",
     "license": "ISC",
@@ -18,5 +19,9 @@
         "@typescript-eslint/parser": "^6.13.2",
         "eslint": "^8.55.0",
         "typescript": "^5.3.3"
+    },
+    "engines": {
+        "npm": ">=8.0.0 <=10.2.3",
+        "node": ">=16.0.0 <=18.19.0"
     }
 }

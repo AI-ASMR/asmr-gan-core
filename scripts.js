@@ -45,7 +45,7 @@ registerCommand('build.lib', () => {
     executeCommand('clean.lib');
 });
 
-registerCommand('build.bin', () => {
+registerCommand('build.bin', (pkg=true,clean=true) => {
     console.log('Building the executable...');
     exec('npx tsc -p ./tsconfig.json', { cwd: './src' });
     /**
@@ -53,13 +53,22 @@ registerCommand('build.bin', () => {
      * @see https://github.com/vercel/pkg-fetch/issues/302
      * @todo @StiliyanKushev Remove v18 targets once support for v20 drops.
      */
-    exec(
+    if(pkg) exec(
         'npx pkg ./package.json ' + 
         '--targets node18-linux-x64,node18-macos-x64,node18-win-x64 ' + 
         '--out-path ../bin ' + 
         '--compress GZip ', { cwd: './src' });
-    executeCommand('clean.bin');
+    if(clean) executeCommand('clean.bin');
 });
+
+registerCommand('run.bin', () => {
+    executeCommand('build.bin', [false /* pkg */, false /* clean */]);
+    process.once('SIGINT', () => { executeCommand('clean.bin') });
+    exec(
+        'node --experimental-specifier-resolution=node ' + 
+        `index.js ${process.argv.join(' ').split('--run.bin')[1] || ''}`, { cwd: './src/.out' });
+    executeCommand('clean.bin');
+}, true /* Don't print to stdout as we're running the binary. */);
 
 registerCommand('docs.lib', () => {
     console.log('todo');
@@ -95,11 +104,17 @@ console.time('\tscript took');
  */
 function exec(cmd, opt = {}) {
     console.log(`> ${cmd}`);
-    return cp.execSync(cmd, {
-        windowsHide: true,
-        stdio: 'inherit',
-        ...opt
-    });
+    try {
+        return cp.execSync(cmd, {
+            windowsHide: true,
+            stdio: 'inherit',
+            ...opt
+        });
+    }
+    catch {
+        // SIGINT and such
+        return '';
+    }
 }
 
 /**
@@ -130,16 +145,25 @@ function rm(path) {
  * 
  * @param {string} name Name of the command. 
  * @param {function} fn Callback called for the command.
+ * @param {boolean} [silent=false] Toggle stdio from this file.
  */
-function registerCommand(name, fn) {
+function registerCommand(name, fn, silent=false) {
     /**
      * Make every registered command also print
      * the time it takes to run.
      */
-    let fnTimed = async () => {
-        console.time(`\t${name} took`);
-        await fn();
-        console.timeEnd(`\t${name} took`);
+    let fnTimed = async (...args) => {
+        if(silent) {
+            let old_log = console.log;
+            console.log = () => {};
+            await fn(...args);
+            console.log = old_log;
+        }
+        else {
+            console.time(`\t${name} took`);
+            await fn(...args);
+            console.timeEnd(`\t${name} took`);
+        }
     };
 
     if(process.argv.includes(`--${name}`)) {
