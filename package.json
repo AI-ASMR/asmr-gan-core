@@ -13,7 +13,8 @@
         "test.bin": "node ./scripts.js --test.bin",
         "lint.all": "node ./scripts.js --lint.all",
         "start": "node ./scripts.js --run.bin",
-        "inc.ver": "node ./scripts.js --inc.ver"
+        "inc.ver": "node ./scripts.js --inc.ver",
+        "publish.git": "node ./scripts.js --publish.git"
     },
     "author": "Stiliyan Kushev",
     "license": "ISC",
