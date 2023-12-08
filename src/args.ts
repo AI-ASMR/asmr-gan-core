@@ -5,32 +5,57 @@ const pargv = minimist(process.argv.slice(2));
 /**
  * Options data structure containing both short and long
  * form for every short-form option.
+ * 
+ * @note the keys are the short form of each option.
+ * @note the values for each key represent an array
+ * with the shape [3,1] that can be described such as:
+ * [shortForm, longForm, valueType]
+ * 
+ * @note `valueType` is later converted to an actual
+ * type. @see {@link StringToTypeMap} and {@link OptionsType}
  */
 const options = {
-    'h': ['h', 'help'],
-    'g': ['g', 'gpu'],
-    'e': ['e', 'epochs'],
-    's': ['s', 'batch-size'],
-    'l': ['l', 'learning-rate'],
-    'v': ['v', 'verbose'],
-    'b': ['b', 'tensorboard'],
-    'p': ['p', 'preview'],
-    'c': ['c', 'checkpoints'],
-    'r': ['r', 'recover'],
-}
+    'h': ['h', 'help', 'boolean']          as const,
+    'g': ['g', 'gpu', 'boolean']           as const,
+    'e': ['e', 'epochs', 'number']         as const,
+    's': ['s', 'batch-size', 'number']     as const,
+    'l': ['l', 'learning-rate', 'number']  as const,
+    'v': ['v', 'verbose', 'boolean']       as const,
+    'b': ['b', 'tensorboard', 'boolean']   as const,
+    'p': ['p', 'preview', 'boolean']       as const,
+    'c': ['c', 'checkpoints', 'boolean']   as const,
+    'r': ['r', 'recover', 'boolean']       as const,
+};
+
+type StringToTypeMap = {
+    'number': number;
+    'boolean': boolean;
+    'string': string;
+};
+type IOptions = typeof options;
+type OptionsShort = typeof options[keyof IOptions][0];
+type OptionsLong = typeof options[keyof IOptions][1];
+type OptionsAny = OptionsShort | OptionsLong;
+type OptionsTypeAsString<T extends keyof IOptions> = IOptions[T][2];
+type OptionsType<T extends keyof IOptions> = StringToTypeMap[OptionsTypeAsString<T>];
+type OptionsLongToShort<T extends OptionsLong> = {
+    [K in keyof IOptions as IOptions[K][1]]: IOptions[K][0];
+}[T];
 
 /**
  * Parse the arguments to a simple kv pair.
  */
-const parsed = {};
+const parsed = {} as {
+    [key in OptionsLong]: OptionsType<OptionsLongToShort<key>>;
+};
 
-const a = (s:string) => pargv[options[s][0]] || pargv[options[s][1]];
-const b = (s?:string) => !('false'==(''+s).toLowerCase()); 
-const n = (s?:string) => Number(s); 
+const a = (s :OptionsShort) => pargv[options[s][0]] || pargv[options[s][1]];
+const b = (s?:OptionsAny) => !('false'==(''+s).toLowerCase()); 
+const n = (s?:OptionsAny) => Number(s); 
 
 if(a('h')) parsed['help']          = b(a('h'))  ?? true;
 if(a('g')) parsed['gpu']           = b(a('g'))  ?? true;
-if(a('e')) parsed['epochs']        = b(a('e'))  ?? Infinity;
+if(a('e')) parsed['epochs']        = n(a('e'))  ?? Infinity;
 if(a('s')) parsed['batch-size']    = n(a('s'))  ?? 32;
 if(a('l')) parsed['learning-rate'] = n(a('l'))  ?? 1e-4;
 if(a('v')) parsed['verbose']       = b(a('v'))  ?? true;
