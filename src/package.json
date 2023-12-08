@@ -1,6 +1,6 @@
 {
   "name": "@aimr/asmr-gan-bin",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "",
   "main": ".out/index.js",
   "bin": ".out/index.js",

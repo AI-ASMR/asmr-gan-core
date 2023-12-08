@@ -14,6 +14,7 @@
         "lint.all": "node ./scripts.js --lint.all",
         "start": "node ./scripts.js --run.bin",
         "inc.ver": "node ./scripts.js --inc.ver",
+        "set.ver": "node ./scripts.js --set.ver",
         "publish.git": "node ./scripts.js --publish.git"
     },
     "author": "Stiliyan Kushev",
