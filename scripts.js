@@ -27,7 +27,9 @@ const registeredCommands = new Map();
  * 
  * @note CI/CD runs this on every pushed change to ./lib or ./src.
  * @note This triggers other CI/CD-controlled calls to registered 
- * commands. @see registerCommand('publish.git')
+ * commands. 
+ * @see registerCommand('publish.git')
+ * @see registerCommand('publish.lib')
  * 
  * @example `npm run inc.ver`
  */
