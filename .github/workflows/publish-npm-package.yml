@@ -1,4 +1,4 @@
-name: NPM package publish on version bump
+name: NPM publish
 
 permissions: write-all
 
