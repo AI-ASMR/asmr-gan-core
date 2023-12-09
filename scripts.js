@@ -199,6 +199,10 @@ registerCommand('build.lib', () => {
     console.log('Building the packed library...');
     exec('npx tsc -p ./tsconfig.json', { cwd: './lib' });
     /**
+     * @note copy the root README.md to the package (used by npm)
+     */
+    fs.copyFileSync('./README.md', './lib/.out/README.md');
+    /**
      * @note dry run to get file name
      * @note stdio: 'pipe' in order for the function to return the stdout.
      */
