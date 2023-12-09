@@ -1,5 +1,10 @@
 # AiMR's Model Training
 
+![Npm publish passing](https://github.com/AI-ASMR/asmr-gan-core/actions/workflows/publish-npm-package.yml/badge.svg?branch=main)
+![Git publish passing](https://github.com/AI-ASMR/asmr-gan-core/actions/workflows/publish-git-version.yml/badge.svg?branch=main)
+[![Npm package version](https://badgen.net/npm/v/@aimr/asmr-gan-lib)](https://www.npmjs.com/package/@aimr/asmr-gan-lib)
+![GitHub release](https://img.shields.io/github/v/release/AI-ASMR/asmr-gan-core?link=https%3A%2F%2Fgithub.com%2FAI-ASMR%2Fasmr-gan-core%2Freleases)
+
 #### Table of Contents
 1. [What is this?](#introduction)
 2. [Getting started.](#getting-started)
