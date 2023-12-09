@@ -1,4 +1,4 @@
-name: Git version publish on version bump
+name: Git publish
 
 permissions: write-all
 
