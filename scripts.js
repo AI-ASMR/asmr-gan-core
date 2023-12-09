@@ -221,7 +221,9 @@ registerCommand('build.lib', () => {
  * @note Not advised to run manually.
  * @note CI/CD will execute this on every version bump. @see registerCommand('inc.ver')
  * 
- * @example `npm run publish.lib`
+ * @see '.github\workflows\publish-npm-package.yml'
+ * 
+ * @example `npm run publish.lib -- <npm_secret_token>`
  */
 registerCommand('publish.lib', async () => {
     console.log('Publishing the library...');
