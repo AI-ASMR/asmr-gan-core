@@ -1,5 +1,11 @@
 # AiMR's Model Training
 
+![Npm publish passing](https://github.com/AI-ASMR/asmr-gan-core/actions/workflows/publish-npm-package.yml/badge.svg?branch=main)
+![Git publish passing](https://github.com/AI-ASMR/asmr-gan-core/actions/workflows/publish-git-version.yml/badge.svg?branch=main)
+[![Npm package version](https://badgen.net/npm/v/@aimr/asmr-gan-lib)](https://www.npmjs.com/package/@aimr/asmr-gan-lib)
+[![GitHub release](https://img.shields.io/github/v/release/AI-ASMR/asmr-gan-core)](https://github.com/AI-ASMR/asmr-gan-core/releases)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/0e89310a47e24d6bb14b42183a653171)](https://app.codacy.com/gh/AI-ASMR/asmr-gan-core/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
 #### Table of Contents
 1. [What is this?](#introduction)
 2. [Getting started.](#getting-started)
