@@ -5,6 +5,7 @@
         "CUDA",
         "gbprc",
         "npmjs",
+        "oneline",
         "pargv",
         "preinstall",
         "StiliyanKushev"
