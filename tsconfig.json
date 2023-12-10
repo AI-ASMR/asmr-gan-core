@@ -6,6 +6,14 @@
         "moduleResolution": "Node",
         "sourceMap": false,
         "declaration": true,
-        "lib": ["ES2015"]
+        "lib": ["ES2015"],
+        "skipLibCheck": true,
+
+        "baseUrl": ".",
+        "paths": {
+            "@common/*": ["./common/*"],
+            "@lib/*": ["./lib/*"],
+            "@bin/*": ["./src/*"],
+        }
     }
 }
