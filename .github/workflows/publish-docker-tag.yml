@@ -1,0 +1,25 @@
+name: Docker publish
+
+permissions: write-all
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'version.cfg'
+      - 'Dockerfile'
+      - '.dockerignore'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+      name: Set up Docker
+    - uses: crazy-max/ghaction-setup-docker@v2
+
+    - name: Publish the new version
+      run: npm run publish.docker -- ${{ secrets.DOCKER_TOKEN }}

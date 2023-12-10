@@ -35,7 +35,10 @@ asmr-gan-bin-<platform> --help
 ```
 For better performance you can also use the binaries via docker like so:
 ```shell
-# todo, docker container.
+# pull the latest version
+sudo docker pull stiliyankushev/aimr-asmr-gan:latest
+# run the docker instance (pass arguments at the end)
+sudo docker run -ti stiliyankushev/aimr-asmr-gan:latest --help
 ```
 ### Build from source. <a id="build-from-source"></a>
 
@@ -60,6 +63,14 @@ same as with the docker container:
 ```shell
 npm start -- --help
 ```
+#### Requirements for CUDA enabled model training
+Running the above command will work but might not automatically pick up your GPU. 
+That's why it's advised to use the docker image which comes pre-configured. However, if you'd like to run this locally without docker, here's what you need:
+-   Nvidia GPU with Cuda support.
+-   Running a Linux distro (preferably supported by tensorflow).
+-   Cuda installed (version < v12.0.0).
+-   Nvidia linux driver that supports the version of cuda installed.
+-   libcudnn installed (version >= 8.9.5).
 
 ### File structure. <a id="file-structure"></a>
 
@@ -81,13 +92,14 @@ This is a basic mono-repo that implements both a library and a running process. 
 
 ### Versioning and automation. <a id="versioning"></a>
 
-Both the (npm) library and the (git) versioned binary share the same common version number. Versioning is automatically increased via CI/CD in the event of meaningful changes. Once there's a version change CI/CD automatically deploys updates for git releases and npm releases respectively.
+Both the (npm) library and the (git) versioned binary, as well as the docker container share the same common version number. Versioning is automatically increased via CI/CD in the event of meaningful changes. Once there's a version change CI/CD automatically deploys updates for git releases, npm releases and docker tag releases respectively.
 
 CI/CD implementation can be found here:
-- [version-bump.yml](https://github.com/AI-ASMR/asmr-gan-core/blob/main/.github/workflows/version-bump.yml) - called on meaningful changes.
-- [publish-git-version.yml](https://github.com/AI-ASMR/asmr-gan-core/blob/main/.github/workflows/publish-git-version.yml) - called on (above) version bump.
-- [publish-npm-package.yml](https://github.com/AI-ASMR/asmr-gan-core/blob/main/.github/workflows/publish-npm-package.yml) - called on (above) version bump.
+-   [version-bump.yml](https://github.com/AI-ASMR/asmr-gan-core/blob/main/.github/workflows/version-bump.yml) - called on meaningful changes.
+-   [publish-git-version.yml](https://github.com/AI-ASMR/asmr-gan-core/blob/main/.github/workflows/publish-git-version.yml) - called on (above) version bump.
+-   [publish-npm-package.yml](https://github.com/AI-ASMR/asmr-gan-core/blob/main/.github/workflows/publish-npm-package.yml) - called on (above) version bump.
+-   [publish-docker-tag.yml](https://github.com/AI-ASMR/asmr-gan-core/blob/main/.github/workflows/publish-docker-tag.yml) - called on (above) version bump.
 
-The repository hosts a minimal, scripted, cross-platform, build tool used by all github actions, as well as users (via npm-scripts.)
+The repository hosts a minimal, scripted and cross-platform build tool used by all github actions, as well as users (via npm-scripts.)
 
 For more details, [read the documented source](https://github.com/AI-ASMR/asmr-gan-core/blob/main/scripts.js).

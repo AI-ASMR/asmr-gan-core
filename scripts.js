@@ -33,13 +33,14 @@ const registeredCommands = new Map();
  * commands. 
  * @see registerCommand('publish.git')
  * @see registerCommand('publish.lib')
+ * @see registerCommand('publish.docker')
  * 
  * @see '.github\workflows\version-bump.yml'
  * 
  * @example `npm run inc.ver`
  */
 registerCommand('inc.ver', (manualVersion = undefined) => {
-    const curVersion = fs.readFileSync('./version.cfg').toString().replaceAll('\n','');
+    const curVersion = fs.readFileSync('./version.cfg').toString().trim();
     const newVersion = manualVersion || (() => {
         const [patch, major, minor] = curVersion.split('.').map(Number);
         return `${patch}.${major}.${minor+1}`;
@@ -104,6 +105,38 @@ registerCommand('inc.ver', (manualVersion = undefined) => {
 registerCommand('set.ver', () => {
     const newVersion = process.argv.pop();
     executeCommand('inc.ver', [newVersion]);
+});
+
+/**
+ * @summary
+ * Builds an up-to-date docker image versioned relative to
+ * the current version of everything else (version.cfg).
+ * 
+ * @example `npm run build.docker`
+ */
+registerCommand('build.docker', () => {
+    const curVersion = fs.readFileSync('./version.cfg').toString().trim();
+    exec(`docker build -t stiliyankushev/aimr-asmr-gan:${curVersion} .`);
+    exec('docker build -t stiliyankushev/aimr-asmr-gan:latest .');
+});
+
+/**
+ * @summary
+ * Builds and publishes a docker image to DockerHub.
+ * @see registerCommand('build.docker')
+ * 
+ * @note Usually not run manually.
+ * @note CI/CD will execute this on every version bump. @see registerCommand('inc.ver')
+ * 
+ * @example `npm run publish.docker -- <token>`
+ */
+registerCommand('publish.docker', async () => {
+    await executeCommand('build.docker');
+    const token = process.argv.pop();
+    const curVersion = fs.readFileSync('./version.cfg').toString().trim();
+    exec(`docker login -u stiliyankushev -p ${token}`);
+    exec(`docker push stiliyankushev/aimr-asmr-gan:${curVersion}`);
+    exec('docker push stiliyankushev/aimr-asmr-gan:latest');
 });
 
 /**
@@ -266,7 +299,7 @@ registerCommand('publish.lib', async () => {
  */
 registerCommand('publish.git', async () => {
     console.log('Publishing current version to git...');
-    const version = fs.readFileSync('./version.cfg').toString().replaceAll('\n','');
+    const version = fs.readFileSync('./version.cfg').toString().trim();
     /**
      * @note 
      * Make sure the bin folder contains only the latest

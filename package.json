@@ -15,7 +15,9 @@
         "start": "node ./scripts.js --run.bin",
         "inc.ver": "node ./scripts.js --inc.ver",
         "set.ver": "node ./scripts.js --set.ver",
-        "publish.git": "node ./scripts.js --publish.git"
+        "publish.git": "node ./scripts.js --publish.git",
+        "build.docker": "node ./scripts.js --build.docker",
+        "publish.docker": "node ./scripts.js --publish.docker"
     },
     "author": "Stiliyan Kushev",
     "license": "ISC",
