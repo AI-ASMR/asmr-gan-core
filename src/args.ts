@@ -72,7 +72,7 @@ function printHelpMessage() {
     console.log('\nUsage: <path/to/executable> <options>');
     console.log('\nOptions:');
     console.log('\t-h, --help               Print this help message.');
-    console.log('\t-g, --gpu                Use CUDA enabled GPU. (Default: false)');
+    console.log('\t-g, --gpu                Use CUDA enabled GPU. (Default: true)');
     console.log('\t-e, --epochs             Number of epochs. (Default: Infinity, until SIGINT)');
     console.log('\t-s, --batch-size         Batch size to use each epoch. (Default: 32)');
     console.log('\t-l, --learning-rate      Set the learning rate. (Default: 1e-4)');
