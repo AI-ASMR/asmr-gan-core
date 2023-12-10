@@ -163,6 +163,18 @@ registerCommand('clean.bin', () => {
 
 /**
  * @summary
+ * Cleans the src folder after emitting js files using gulp.
+ * 
+ * @note Used only as an auxiliary and not really meant
+ * for manual use.
+ */
+registerCommand('clean.pre.bin', () => {
+    console.log('Cleaning preprocessed src folder...');
+    rm('./src/.pre');
+});
+
+/**
+ * @summary
  * Installs all node-modules and deps for the library.
  * 
  * @note Used only as an auxiliary and not really meant
@@ -289,20 +301,23 @@ registerCommand('publish.git', async () => {
  * 
  * @example `npm run build.bin`
  */
-registerCommand('build.bin', (pkg=true,clean=true) => {
+registerCommand('build.bin', () => {
     console.log('Building the executable...');
-    exec('npx tsc -p ./tsconfig.json', { cwd: './src' });
+    exec('npx gulp', { cwd: './src', stdio: 'pipe' });
+    exec('npx tsc -p ./pkg.tsconfig.json', { cwd: './src' });
+    executeCommand('clean.pre.bin');
+    exec('npx gulp pkg.postprocessing.out', { cwd: './src', stdio: 'pipe' });
     /**
      * @note pkg currently only supports node v18.
      * @see https://github.com/vercel/pkg-fetch/issues/302
      * @todo @StiliyanKushev Remove v18 targets once support for v20 drops.
      */
-    if(pkg) exec(
+    exec(
         'npx pkg ./package.json ' + 
         '--targets node18-linux-x64,node18-macos-x64,node18-win-x64 ' + 
         '--out-path ../bin ' + 
         '--compress GZip ', { cwd: './src' });
-    if(clean) executeCommand('clean.bin');
+    executeCommand('clean.bin');
 });
 
 /**
@@ -314,12 +329,20 @@ registerCommand('build.bin', (pkg=true,clean=true) => {
  * @example `npm start -- -h`
  */
 registerCommand('run.bin', () => {
-    executeCommand('build.bin', [false /* pkg */, false /* clean */]);
-    process.once('SIGINT', () => { executeCommand('clean.bin'); });
-    exec(
-        'node --experimental-specifier-resolution=node ' + 
-        `index.js ${process.argv.join(' ').split('--run.bin')[1] || ''}`, { cwd: './src/.out' }, true);
-    executeCommand('clean.bin');
+    /**
+     * @deprecated
+     * Instead of building to js manually and cleaning up afterwards,
+     * we can use `tsx` which automatically does that and supports esm
+     * out of the box.
+     * 
+     * @see https://www.npmjs.com/package/tsx
+     * 
+     *****************************************************************/
+    const args = process.argv.join(' ').split('--run.bin')[1] || '';
+    process.once('SIGINT', () => executeCommand('clean.pre.bin', [], true));
+    process.once('exit', () => executeCommand('clean.pre.bin', [], true));
+    exec('DEV=true npx gulp', { cwd: './src', stdio: 'pipe' });
+    exec(`npx tsx ./.pre/index.ts --tsconfig ./dev.tsconfig.json ${args}`, { cwd: './src' });
 }, true /* Don't print to stdout as we're running the binary. */);
 
 registerCommand('docs.lib', () => {
@@ -440,18 +463,28 @@ function registerCommand(name, fn, silent=false) {
  * command using {@link registerCommand}.
  * 
  * @param {string} name Name of the registered command.
- * @param {any[]} [args] Any args to pass to the callback.
+ * @param {any[]} [args=[]] Any args to pass to the callback.
+ * @param {boolean} [silent=false] Should we print logs during execution.
  * 
  * @returns Whatever the named handler of the registered command
  * returns. Oftentimes, simply undefined.
  */
-async function executeCommand(name, args=[]) {
+async function executeCommand(name, args=[], silent=false) {
     const fn = registeredCommands.get(name);
     if(!fn) {
         console.log(new Error(`Unknown registered command, '${name}'`).stack);
         process.exit(1);
     }
-    return await fn(...args);
+    if(silent) {
+        const oldLog = console.log;
+        console.log = () => {};
+        const ret = await fn(...args);
+        console.log = oldLog;
+        return ret;
+    }
+    else {
+        return await fn(...args);
+    }
 }
 
 process.on('exit', code => {

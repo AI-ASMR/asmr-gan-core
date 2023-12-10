@@ -1,0 +1,14 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": "./.pre",
+        "paths": {
+            "@common/*": ["./*"],
+            "@lib/*": ["./*"],
+            "@bin/*": ["./*"]
+        }
+    },
+    "include": [
+        "./.pre/**/*"
+    ]
+}

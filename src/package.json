@@ -10,8 +10,13 @@
   "author": "StiliyanKushev",
   "license": "ISC",
   "devDependencies": {
+    "@diamondyuan/gulp-ifdef": "^0.3.0",
+    "@tensorflow/tfjs-node-gpu": "^4.14.0",
     "@types/node": "^20.10.4",
-    "pkg": "^5.8.1"
+    "gulp": "^4.0.2",
+    "gulp-replace": "^1.1.4",
+    "pkg": "^5.8.1",
+    "tsx": "^4.6.2"
   },
   "dependencies": {
     "minimist": "^1.2.8"

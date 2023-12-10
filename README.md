@@ -33,7 +33,7 @@ To get a quick rundown on how to use it simply run:
 ```shell
 asmr-gan-bin-<platform> --help
 ```
-You can also use the binaries via docker like so:
+For better performance you can also use the binaries via docker like so:
 ```shell
 # todo, docker container.
 ```
@@ -54,7 +54,9 @@ Build the binaries:
 ```shell
 npm run build.bin
 ```
-You can use the binaries directly from source without building executables:
+You can use the binaries directly from source without building executables.
+This will attempt to use your (CUDA enabled) GPU (Linux Only),
+same as with the docker container:
 ```shell
 npm start -- --help
 ```
