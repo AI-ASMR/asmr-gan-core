@@ -119,8 +119,7 @@ For more details, [read the documented source](https://github.com/AI-ASMR/asmr-g
 
 This is a short guide on how to install the NVIDIA Container Toolkit on arch linux. For other Linux distros take a look at their official [guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
 
-I've created a custom PKGBUILD you need to install.
-Build and install it.
+I've created a custom PKGBUILD you need to build and install.
 
 Make a fresh directory:
 ```shell
