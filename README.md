@@ -45,7 +45,7 @@ sudo docker run --gpus all -ti stiliyankushev/aimr-asmr-gan:latest --help
 ```
 
 #### (Optional) Docker Prerequisites.
-Running the above docker container will automatically use a version of tensorflow that makes use of native C bindings. It'll also try to take advantage of any CUDA enabled GPUs running on the system. The docker container already pre-configures Cuda and Cudnn to work with tensorflow js. What you need to do is:
+Running the above docker container will automatically use a version of tensorflow that makes use of native C bindings. It'll also try to take advantage of any CUDA enabled GPUs running on the system. The docker container already pre-configures Cuda and Cudnn to work with tensorflow js. What you need to do is have:
 -   Nvidia GPU with Cuda support.
 -   Running a Linux distro.
 -   Nvidia proprietary drivers installed.
