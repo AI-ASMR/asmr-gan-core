@@ -135,7 +135,7 @@ Build the package:
 ```shell
 makepkg
 ```
-Install all .tgz files:
+Install all .tar.zst files:
 ```shell
 sudo pacman -U \ 
 ./libnvidia-container1-1.14.3-1-x86_64.pkg.tar.zst \
