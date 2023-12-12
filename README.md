@@ -14,6 +14,7 @@
 3. [Build from source.](#build-from-source)
 4. [Repo's file structure.](#file-structure)
 5. [Versioning and automation.](#versioning)
+6. [Arch linux NVIDIA Container Toolkit.](#arch-nvidia-container)
 
 ### What is this? <a id="introduction"></a>
 
@@ -40,8 +41,16 @@ For better performance you can also use the binaries via docker like so:
 # pull the latest version
 sudo docker pull stiliyankushev/aimr-asmr-gan:latest
 # run the docker instance (pass arguments at the end)
-sudo docker run -ti stiliyankushev/aimr-asmr-gan:latest --help
+sudo docker run --gpus all -ti stiliyankushev/aimr-asmr-gan:latest --help
 ```
+
+#### (Optional) Docker Prerequisites.
+Running the above docker container will automatically use a version of tensorflow that makes use of native C bindings. It'll also try to take advantage of any CUDA enabled GPUs running on the system. The docker container already pre-configures Cuda and Cudnn to work with tensorflow js. What you need to do is:
+-   Nvidia GPU with Cuda support.
+-   Running a Linux distro.
+-   Nvidia proprietary drivers installed.
+-   Installed and configured NVIDIA Container Toolkit. (for arch linux, [follow my guide](#arch-nvidia-container).)
+
 ### Build from source. <a id="build-from-source"></a>
 
 You can build both the library and the binary from source using short predefined npm-scripts.
@@ -65,7 +74,7 @@ same as with the docker container:
 ```shell
 npm start -- --help
 ```
-#### Requirements for CUDA enabled model training
+#### Requirements for CUDA enabled model training.
 Running the above command will work but might not automatically pick up your GPU. 
 That's why it's advised to use the docker image which comes pre-configured. However, if you'd like to run this locally without docker, here's what you need:
 -   Nvidia GPU with Cuda support.
@@ -105,3 +114,51 @@ CI/CD implementation can be found here:
 The repository hosts a minimal, scripted and cross-platform build tool used by all github actions, as well as users (via npm-scripts.)
 
 For more details, [read the documented source](https://github.com/AI-ASMR/asmr-gan-core/blob/main/scripts.js).
+
+### Arch linux NVIDIA Container Toolkit. <a id="arch-nvidia-container"></a>
+
+This is a short guide on how to install the NVIDIA Container Toolkit on arch linux. For other Linux distros take a look at their official [guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
+
+I've created a custom PKGBUILD you need to install.
+Build and install it.
+
+Make a fresh directory:
+```shell
+mkdir ./temp-nvidia 
+cd ./temp-nvidia
+```
+Download the PKGBUILD file:
+```shell
+wget https://raw.githubusercontent.com/AI-ASMR/asmr-gan-core/main/PKGBUILD
+```
+Build the package:
+```shell
+makepkg
+```
+Install all .tgz files:
+```shell
+sudo pacman -U \ 
+./libnvidia-container1-1.14.3-1-x86_64.pkg.tar.zst \
+./libnvidia-container-tools-1.14.3-1-x86_64.pkg.tar.zst \
+./nvidia-container-runtime-1.14.3-1-x86_64.pkg.tar.zst \
+./nvidia-container-toolkit-1.14.3-1-x86_64.pkg.tar.zst \ 
+./nvidia-container-toolkit-base-1.14.3-1-x86_64.pkg.tar.zst \ 
+./nvidia-docker2-1.14.3-1-x86_64.pkg.tar.zst
+```
+Install `libnvidia-container-tools` manually:
+```shell
+sudo pacman -Syu libnvidia-container-tools
+```
+Configure docker:
+```shell
+sudo nvidia-ctk runtime configure --runtime=docker
+```
+Restart docker afterwards:
+```shell
+sudo systemctl restart docker
+```
+At this point docker should be configured. Test like so:
+```shell
+sudo docker run --gpus all ubuntu nvidia-smi
+```
+If `nvidia-smi` works, than everything works as expected.
