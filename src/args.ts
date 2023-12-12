@@ -16,7 +16,6 @@ const pargv = minimist(process.argv.slice(2));
  */
 const options = {
     'h': ['h', 'help', 'boolean']          as const,
-    'g': ['g', 'gpu', 'boolean']           as const,
     'e': ['e', 'epochs', 'number']         as const,
     's': ['s', 'batch-size', 'number']     as const,
     'l': ['l', 'learning-rate', 'number']  as const,
@@ -54,7 +53,6 @@ const b = (s?:OptionsAny) => !('false'==(''+s).toLowerCase());
 const n = (s?:OptionsAny) => Number(s); 
 
 if(a('h')) parsed['help']          = b(a('h'))  ?? true;
-if(a('g')) parsed['gpu']           = b(a('g'))  ?? true;
 if(a('e')) parsed['epochs']        = n(a('e'))  ?? Infinity;
 if(a('s')) parsed['batch-size']    = n(a('s'))  ?? 32;
 if(a('l')) parsed['learning-rate'] = n(a('l'))  ?? 1e-4;
@@ -72,7 +70,6 @@ function printHelpMessage() {
     console.log('\nUsage: <path/to/executable> <options>');
     console.log('\nOptions:');
     console.log('\t-h, --help               Print this help message.');
-    console.log('\t-g, --gpu                Use CUDA enabled GPU. (Default: true)');
     console.log('\t-e, --epochs             Number of epochs. (Default: Infinity, until SIGINT)');
     console.log('\t-s, --batch-size         Batch size to use each epoch. (Default: 32)');
     console.log('\t-l, --learning-rate      Set the learning rate. (Default: 1e-4)');
