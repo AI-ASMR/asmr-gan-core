@@ -52,15 +52,18 @@ const a = (s :OptionsShort) => pargv[options[s][0]] || pargv[options[s][1]];
 const b = (s?:OptionsAny) => !('false'==(''+s).toLowerCase()); 
 const n = (s?:OptionsAny) => Number(s); 
 
-if(a('h')) parsed['help']          = b(a('h'))  ?? true;
-if(a('e')) parsed['epochs']        = n(a('e'))  ?? Infinity;
-if(a('s')) parsed['batch-size']    = n(a('s'))  ?? 32;
-if(a('l')) parsed['learning-rate'] = n(a('l'))  ?? 1e-4;
-if(a('v')) parsed['verbose']       = b(a('v'))  ?? true;
-if(a('b')) parsed['tensorboard']   = b(a('b'))  ?? true;
-if(a('p')) parsed['preview']       = b(a('p'))  ?? true;
-if(a('c')) parsed['checkpoints']   = b(a('c'))  ?? true;
-if(a('r')) parsed['recover']       = b(a('r'))  ?? true;
+/**
+[define arguments]      [if passed]  [if set]   [if not set]  [if not passed]
+*****************************************************************************/
+parsed['help']          = a('h') ?   b(a('h'))  ?? true       : false;
+parsed['epochs']        = a('e') ?   n(a('e'))  ?? Infinity   : Infinity;
+parsed['batch-size']    = a('s') ?   n(a('s'))  ?? undefined  : undefined; /* defined in @common/model.ts */
+parsed['learning-rate'] = a('l') ?   n(a('l'))  ?? undefined  : undefined; /* defined in @common/model.ts */
+parsed['verbose']       = a('v') ?   b(a('v'))  ?? true       : true;
+parsed['tensorboard']   = a('b') ?   b(a('b'))  ?? true       : true;
+parsed['preview']       = a('p') ?   b(a('p'))  ?? true       : true;
+parsed['checkpoints']   = a('c') ?   b(a('c'))  ?? true       : true;
+parsed['recover']       = a('r') ?   b(a('r'))  ?? true       : true;
 
 /**
  * All in one function to print the help message to stdout.
@@ -72,7 +75,7 @@ function printHelpMessage() {
     console.log('\t-h, --help               Print this help message.');
     console.log('\t-e, --epochs             Number of epochs. (Default: Infinity, until SIGINT)');
     console.log('\t-s, --batch-size         Batch size to use each epoch. (Default: 32)');
-    console.log('\t-l, --learning-rate      Set the learning rate. (Default: 1e-4)');
+    console.log('\t-l, --learning-rate      Set the learning rate. (Default: 2e-4)');
     console.log('\t-v, --verbose            Increase verbosity level. (Default: not verbose)');
     console.log('\t-b, --tensorboard        Update tensorboard graphs while training. (Default: true)');
     console.log('\t-p, --preview            Generate preview sampled image. (Default: true)');
