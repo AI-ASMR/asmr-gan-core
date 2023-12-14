@@ -35,14 +35,18 @@ export default class Model {
      * library before it's ready to be used.
      * 
      * @param _tf Tensorflow default export the model will use.
+     * @param {number} [learningRate] Optional override.
+     * @param {number} [batchSize] Optional override.
      * 
      * @example
-     * Model.bind(require('@tensorflow/tfjs'));
+     * Model.configure(require('@tensorflow/tfjs'), ...);
      * // or
-     * Model.bind(require('@tensorflow/tfjs-node-gpu'));
+     * Model.configure(require('@tensorflow/tfjs-node-gpu'), ...);
      */
-    static bind(_tf: typeof tf) {
-        this.tf = _tf;
+    static configure(_tf: typeof tf, learningRate = this.LEARNING_RATE, batchSize = this.BATCH_SIZE) {
+        Model.tf = _tf;
+        Model.LEARNING_RATE = learningRate;
+        Model.BATCH_SIZE = batchSize;
     }
 
     /**
@@ -226,13 +230,15 @@ export default class Model {
      * 
      * @param {tf.LayersModel} generator @see Model.createGenerator(...)
      * @param {tf.LayersModel} discriminator @see Model.createDiscriminator(...)
-     * @param {tf.Tensor<tf.Rank>} realBatch Real images with batch size that's the same
-     * as the generator's. @see Model.BATCH_SIZE
+     * @param {tf.Tensor} realBatch Real images with batch size
+     * and image size that's the same as the generator's. 
+     * @see Model.BATCH_SIZE
+     * @see Model.IMAGE_SIZE 
      * 
      * @returns {number} loss of discriminator.
      */
     static async trainDiscriminator(
-        generator: tf.LayersModel, discriminator: tf.LayersModel, realBatch: tf.Tensor<tf.Rank>) 
+        generator: tf.LayersModel, discriminator: tf.LayersModel, realBatch: tf.Tensor) 
     {
         const [x, y] = this.tf.tidy(() => {
             // create random noise for generator's input
@@ -242,12 +248,12 @@ export default class Model {
             // create many 'fake' images
             const generatedImages = generator.predict(zVectors, { 
                 batchSize: this.BATCH_SIZE 
-            }) as tf.Tensor<tf.Rank>;
+            }) as tf.Tensor;
         
-            // x's will half 'real' and half 'fake' images
+            // x's includes half 'real' and half 'fake' images
             const x = this.tf.concat([realBatch, generatedImages], 0);
         
-            // y's will include half 1's and half 0's for real and fake predictions.
+            // y's includes half 1's and half 0's for real and fake predictions.
             const y = this.tf.tidy(
                 () => this.tf.concat([
                     this.tf.ones([this.BATCH_SIZE, 1]).mul(this.SOFT_ONE), 
