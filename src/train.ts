@@ -1,0 +1,15 @@
+import * as tf from './tensorflow';
+import { args } from './args';
+import { datasetReader } from './data';
+
+export default async function beginTraining() {
+    const datasetIterator = datasetReader(10000, args['batch-size']);
+
+    for(let epoch = 0; epoch < args.epochs; epoch++) {
+        for(const [batchCount, realBatch] of datasetIterator()) {
+            console.log(`epoch: ${epoch}/${args.epochs} | batch: ${batchCount}`);
+            console.log(realBatch.shape);
+            console.log(tf.memory().numTensors);
+        }
+    }
+}
