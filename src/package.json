@@ -19,6 +19,7 @@
     "tsx": "^4.6.2"
   },
   "dependencies": {
-    "minimist": "^1.2.8"
+    "minimist": "^1.2.8",
+    "mnist": "^1.1.0"
   }
 }
