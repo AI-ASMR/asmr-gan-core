@@ -4,6 +4,9 @@
         "aimr",
         "asmr",
         "CUDA",
+        "deconv",
+        "Deconvolution",
+        "deconvolutional",
         "diamondyuan",
         "gbprc",
         "gulpfile",
@@ -14,6 +17,7 @@
         "pargv",
         "preinstall",
         "Stiliyan",
-        "StiliyanKushev"
+        "StiliyanKushev",
+        "upsampled"
     ]
 }

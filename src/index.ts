@@ -28,9 +28,9 @@ let tf: typeof tfVanilla; try { tf = tfNode; } catch { tf = tfVanilla; }
 
 import { argv, args } from './args';
 
-import test from '@common/model';
+// import test from '@common/model';
 
-test(tf.scalar(1));
+// test(tf.scalar(1));
 
 console.log({ argv, args });
 
