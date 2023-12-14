@@ -1,39 +1,13 @@
-/// #if DEV
-import * as tfNode from '@tensorflow/tfjs-node-gpu';
-/// #else
-import tfVanilla from '@tensorflow/tfjs';
-/// #endif
+import Model from '@common/model';
 
-/**
- * @note
- * We declare both variables here before initializing `tf`
- * down bellow to make typescript ignore the ReferenceError
- * upon binary compilation.
- */
-declare global {
-    const tfNode;
-    const tfVanilla;
-}
+import * as tf from './tensorflow';
+import { args } from './args';
+import beginTraining from './train';
 
-/**
- * @note
- * Here tensorflow version is determined by the building
- * procedure.
- * 
- * @see `.\gulpfile.js` and `npm start`
- * 
- * @note try-catch used to ignore ReferenceError at runtime.
- */
-let tf: typeof tfVanilla; try { tf = tfNode; } catch { tf = tfVanilla; }
+// configure the model prior to training it.
+Model.configure(tf, args['learning-rate'], args['batch-size']);
+args['learning-rate'] = Model.LEARNING_RATE;
+args['batch-size'] = Model.BATCH_SIZE;
 
-import { argv, args } from './args';
-
-// import test from '@common/model';
-
-// test(tf.scalar(1));
-
-console.log({ argv, args });
-
-setTimeout(() => {
-    console.log({ argv, args });
-}, 3000);
+// main loop
+beginTraining();
