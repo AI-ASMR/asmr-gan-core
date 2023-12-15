@@ -8,7 +8,7 @@ import { updatePreview } from './preview';
  * Main training loop.
  */
 export default async function beginTraining() {
-    const datasetIterator = datasetReader(10000, args['batch-size']);
+    const datasetIterator = datasetReader(args['batch-size']);
 
     for(let epoch = 0; epoch < args.epochs; epoch++) {
         for(const [batchCount, realBatch] of datasetIterator()) {

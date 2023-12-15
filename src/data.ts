@@ -29,9 +29,9 @@ import * as tf from './tensorflow';
  *   }
  * }
  */
-export function datasetReader(datasetSize: number, batchSize: number) {
+export function datasetReader(batchSize: number) {
     // generate dataset
-    let dataset = mnist.set(datasetSize, 0).training;
+    let dataset = mnist.set(10000, 0).training;
 
     // normalize from -1 to 1 due to the generator's tanh activation.
     dataset = dataset.map(({ input }) => input.map(e => e * 2 - 1));
