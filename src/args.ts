@@ -15,16 +15,14 @@ const pargv = minimist(process.argv.slice(2));
  * type. @see {@link StringToTypeMap} and {@link OptionsType}
  */
 const options = {
-    'h': ['h', 'help', 'boolean']          as const,
-    'e': ['e', 'epochs', 'number']         as const,
-    's': ['s', 'batch-size', 'number']     as const,
-    'l': ['l', 'learning-rate', 'number']  as const,
-    'v': ['v', 'verbose', 'boolean']       as const,
-    'b': ['b', 'tensorboard', 'boolean']   as const,
-    'p': ['p', 'preview', 'boolean']       as const,
-    'c': ['c', 'checkpoints', 'boolean']   as const,
-    'r': ['r', 'recover', 'boolean']       as const,
-};
+    'h': [ 'h', 'help',          'boolean' ],
+    'e': [ 'e', 'epochs',        'number'  ],
+    's': [ 's', 'batch-size',    'number'  ],
+    'l': [ 'l', 'learning-rate', 'number'  ],
+    'b': [ 'b', 'tensorboard',   'string'  ],
+    'p': [ 'p', 'preview',       'string'  ],
+    'c': [ 'c', 'checkpoints',   'boolean' ],
+} as const;
 
 type StringToTypeMap = {
     'number': number;
@@ -51,6 +49,7 @@ const parsed = {} as {
 const a = (s :OptionsShort) => pargv[options[s][0]] || pargv[options[s][1]];
 const b = (s?:OptionsAny) => !('false'==(''+s).toLowerCase()); 
 const n = (s?:OptionsAny) => Number(s); 
+const s = (s?:OptionsAny) => (''+s).toLowerCase()=='true'?undefined:''+s; 
 
 /**
 [define arguments]      [if passed]  [if set]   [if not set]  [if not passed]
@@ -59,11 +58,9 @@ parsed['help']          = a('h') ?   b(a('h'))  ?? true       : false;
 parsed['epochs']        = a('e') ?   n(a('e'))  ?? Infinity   : Infinity;
 parsed['batch-size']    = a('s') ?   n(a('s'))  ?? undefined  : undefined; /* defined in @common/model.ts */
 parsed['learning-rate'] = a('l') ?   n(a('l'))  ?? undefined  : undefined; /* defined in @common/model.ts */
-parsed['verbose']       = a('v') ?   b(a('v'))  ?? true       : true;
-parsed['tensorboard']   = a('b') ?   b(a('b'))  ?? true       : true;
-parsed['preview']       = a('p') ?   b(a('p'))  ?? true       : true;
+parsed['tensorboard']   = a('b') ?   s(a('b'))  ?? undefined  : undefined;
+parsed['preview']       = a('p') ?   s(a('p'))  ?? undefined  : undefined;
 parsed['checkpoints']   = a('c') ?   b(a('c'))  ?? true       : true;
-parsed['recover']       = a('r') ?   b(a('r'))  ?? true       : true;
 
 /**
  * All in one function to print the help message to stdout.
@@ -76,16 +73,14 @@ function printHelpMessage() {
     console.log('\t-e, --epochs             Number of epochs. (Default: Infinity, until SIGINT)');
     console.log('\t-s, --batch-size         Batch size to use each epoch. (Default: 32)');
     console.log('\t-l, --learning-rate      Set the learning rate. (Default: 2e-4)');
-    console.log('\t-v, --verbose            Increase verbosity level. (Default: not verbose)');
-    console.log('\t-b, --tensorboard        Update tensorboard graphs while training. (Default: true)');
-    console.log('\t-p, --preview            Generate preview sampled image. (Default: true)');
-    console.log('\t-c, --checkpoints        Generate checkpoints. (Default: true)');
-    console.log('\t-r, --recover            Recover available checkpoints. (Default: true)');
+    console.log('\t-b, --tensorboard        Update tensorboard graphs while training at the given path.');
+    console.log('\t-p, --preview            Generate preview sampled png image at the given path.');
+    console.log('\t-c, --checkpoints        Generate/restore checkpoints. (Default: true)');
     console.log('\nExamples:');
     console.log('\t# Simple test without checkpoints and GPU acceleration.');
-    console.log('\t$ <path/to/executable> -gbprc=false\n');
-    console.log('\t# Verbose test with all the bells and whistles for a few epochs.');
-    console.log('\t$ <path/to/executable> -g -e 100 -s 10\n');
+    console.log('\t$ <path/to/executable> -pc=false -b=./tensorboard\n');
+    console.log('\t# All the bells and whistles for a few epochs.');
+    console.log('\t$ <path/to/executable> -e 100 -s 10\n');
     process.exit();
 }
 

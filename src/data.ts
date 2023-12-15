@@ -77,6 +77,7 @@ export function datasetReader(datasetSize: number, batchSize: number) {
     
     return function getIterator() {
         index = 0;
+        batchCount = 0;
         return makeIterator();
     };
 }
