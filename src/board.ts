@@ -7,7 +7,7 @@ import { args } from './args';
 let summaryWriter: ReturnType<typeof tf.node.summaryFileWriter>;
 let summaryPath: PathLike;
 
-if(args.tensorboard) {
+if(args.tensorboard && tf.node) {
     summaryPath = path.resolve(args.tensorboard);
 
     // delete old stats
@@ -33,7 +33,7 @@ const tfGraphMap = {};
  * @param {number} value Scalar value to be appended.
  */
 export function updateGraph(name: string, value: number) {
-    if(!args.tensorboard) {
+    if(!args.tensorboard || !tf.node) {
         return;
     }
 

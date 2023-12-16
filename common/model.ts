@@ -25,7 +25,7 @@ export default class Model {
     static ADAM_BETA2     = 0.999;
     static SOFT_ONE       = 0.95;
     static LATENT_SIZE    = 100;
-    static BATCH_SIZE     = 100;
+    static BATCH_SIZE     = 10;
     static IMAGE_SIZE     = 128;
 
     static tf: typeof tf;
@@ -54,7 +54,7 @@ export default class Model {
      * Outputs a shape of [x, x, 1] where `x` is @see Model.IMAGE_SIZE
      * 
      * The image is grayscale (as apparent by the 1 channel in the shape).
-     * The values are in the range of -1 to 1 using `tahn` as activation
+     * The values are in the range of -1 to 1 using `tanh` as activation
      * for the last layer.
      * 
      * @returns {tf.LayersModel} discriminator model.
@@ -65,10 +65,8 @@ export default class Model {
         model.add(this.tf.layers.dense({ 
             inputShape: [this.LATENT_SIZE], 
             units: 8 * 8 * 256, 
-            useBias: false 
+            activation: 'relu'
         }));
-        model.add(this.tf.layers.batchNormalization());
-        model.add(this.tf.layers.reLU());
         model.add(this.tf.layers.reshape({ targetShape: [8, 8, 256] }));
 
         // Deconvolution layers
@@ -91,9 +89,10 @@ export default class Model {
             strides: 2,
             ...x, 
         }));
-    
-        deconvLayers.forEach(layerConfig => {
+
+        deconvLayers.forEach((layerConfig, i) => {
             model.add(this.tf.layers.conv2dTranspose(layerConfig));
+            if(i == deconvLayers.length-1) return;
             model.add(this.tf.layers.batchNormalization());
         });
         
@@ -103,6 +102,8 @@ export default class Model {
          * alone (as opposed to the discriminator).
          */
 
+        console.log('\n\ncreateGenerator()');
+        model.summary();
         return model;
     }
 
@@ -114,28 +115,17 @@ export default class Model {
     static createDiscriminator() {
         const model = this.tf.sequential();
     
-        // The first convolution layer does not use batch normalization
-        model.add(this.tf.layers.conv2d({
-            filters: 128,
-            kernelSize: 5,
-            strides: 2,
-            padding: 'same',
-            inputShape: [this.IMAGE_SIZE, this.IMAGE_SIZE, 1]
-        }));
-        model.add(this.tf.layers.leakyReLU());
-        model.add(this.tf.layers.dropout({ rate: 0.3 }));
-    
         // Subsequent convolution layers with increasing filters
         const convLayers: ConvLayerArgs[] = [
+            { filters: 32,  kernelSize: 8, strides: 2, padding: 'same', inputShape: [this.IMAGE_SIZE, this.IMAGE_SIZE, 1] },
+            { filters: 64,  kernelSize: 8, strides: 1, padding: 'same' },
             { filters: 128, kernelSize: 5, strides: 2, padding: 'same' },
-            { filters: 256, kernelSize: 5, strides: 2, padding: 'same' },
-            { filters: 512, kernelSize: 5, strides: 2, padding: 'same' }
+            { filters: 256, kernelSize: 3, strides: 1, padding: 'same' }
         ];
     
         convLayers.forEach(layerConfig => {
             model.add(this.tf.layers.conv2d(layerConfig));
-            model.add(this.tf.layers.batchNormalization());
-            model.add(this.tf.layers.leakyReLU());
+            model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
             model.add(this.tf.layers.dropout({ rate: 0.3 }));
         });
     
@@ -150,6 +140,7 @@ export default class Model {
                 this.ADAM_BETA2),
             loss: 'binaryCrossentropy'
         });
+        console.log('\n\ncreateDiscriminator()');
         model.summary();
         return model;
     }
@@ -184,7 +175,7 @@ export default class Model {
          * 
          * @note the optimizer only minimizes the generator.
          */
-        const combined = tf.model({inputs: latent, outputs: estimate });
+        const combined = this.tf.model({ inputs: latent, outputs: estimate });
         combined.compile({
             optimizer: this.tf.train.adam(
                 this.LEARNING_RATE, 
@@ -192,7 +183,9 @@ export default class Model {
                 this.ADAM_BETA2),
             loss: 'binaryCrossentropy'
         });
+        console.log('\n\ncreateCombinedModel()');
         combined.summary();
+        discriminator.trainable = true;
         return combined;
     }
 
@@ -208,16 +201,16 @@ export default class Model {
     static async trainGenerator(combined: tf.LayersModel) {
         const [noise, trick] = this.tf.tidy(() => {
             // make new latent vectors.
-            const zVectors = this.tf.randomUniform([this.BATCH_SIZE, this.LATENT_SIZE], -1, 1);
+            const zVectors = this.tf.randomUniform([this.BATCH_SIZE*2, this.LATENT_SIZE], -1, 1);
         
             // we want fakes to be discriminated as real.
-            const trick = this.tf.tidy(() => this.tf.ones([this.BATCH_SIZE, 1]).mul(this.SOFT_ONE));
+            const trick = this.tf.tidy(() => this.tf.ones([this.BATCH_SIZE*2, 1]).mul(this.SOFT_ONE));
             return [zVectors, trick];
         });
 
         const loss = await combined.trainOnBatch(noise, trick);
         this.tf.dispose([noise, trick]);
-        return loss;
+        return loss as number;
     }
 
     /**
@@ -235,19 +228,22 @@ export default class Model {
      * @see Model.BATCH_SIZE
      * @see Model.IMAGE_SIZE 
      * 
-     * @returns {number} loss of discriminator.
+     * @returns {Promise<number>} loss of discriminator.
      */
     static async trainDiscriminator(
         generator: tf.LayersModel, discriminator: tf.LayersModel, realBatch: tf.Tensor) 
     {
+        // the batch could be less then Model.BATCH_SIZE if it's the last chunk
+        const REAL_BATCH_SIZE = realBatch.shape[0];
+
         const [x, y] = this.tf.tidy(() => {
             // create random noise for generator's input
             const zVectors = this.tf.randomUniform(
-                [this.BATCH_SIZE, this.LATENT_SIZE], -1, 1);
+                [REAL_BATCH_SIZE, this.LATENT_SIZE], -1, 1);
         
             // create many 'fake' images
             const generatedImages = generator.predict(zVectors, { 
-                batchSize: this.BATCH_SIZE 
+                batchSize: REAL_BATCH_SIZE 
             }) as tf.Tensor;
         
             // x's includes half 'real' and half 'fake' images
@@ -256,15 +252,14 @@ export default class Model {
             // y's includes half 1's and half 0's for real and fake predictions.
             const y = this.tf.tidy(
                 () => this.tf.concat([
-                    this.tf.ones([this.BATCH_SIZE, 1]).mul(this.SOFT_ONE), 
-                    this.tf.zeros([this.BATCH_SIZE, 1])
+                    this.tf.ones([REAL_BATCH_SIZE, 1]).mul(this.SOFT_ONE), 
+                    this.tf.zeros([REAL_BATCH_SIZE, 1])
                 ]));
         
             return [x, y];
         });
-
         const loss = await discriminator.trainOnBatch(x, y);
         this.tf.dispose([x, y]);
-        return loss;
+        return loss as number;
     }
 }

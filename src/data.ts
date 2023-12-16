@@ -1,6 +1,7 @@
 import mnist from 'mnist'; 
 
 import * as tf from './tensorflow';
+import Model from '@common/model';
 
 /**
  * This function is used to step over the entire dataset by `batchSize`
@@ -64,7 +65,7 @@ export function datasetReader(batchSize: number) {
                 const tensor = tf.tensor(rawData);
                 const batch = tensor.reshape([actualBatchSize, 28, 28, 1]) as tf.Tensor4D;
                 // note: upscale shouldn't be needed when using actual dataset.
-                const upscale = tf.image.resizeNearestNeighbor(batch, [128, 128]);
+                const upscale = tf.image.resizeNearestNeighbor(batch, [Model.IMAGE_SIZE, Model.IMAGE_SIZE]);
                 return upscale;
             });
     
