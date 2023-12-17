@@ -72,7 +72,7 @@ export function datasetReader(batchSize: number) {
             });
     
             batchCount++;
-            index++;
+            index += batchSize;
 
             tCurrYield = Date.now();
             tCurrYield -= tLastYield || tCurrYield;
