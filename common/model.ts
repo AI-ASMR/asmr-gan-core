@@ -14,8 +14,6 @@
  */
 import tf from '@tensorflow/tfjs';
 
-type ConvLayerArgs = Parameters<typeof tf.layers.conv2d>[0];
-
 export default class Model {
     /**
      * constants used during training.
@@ -26,7 +24,7 @@ export default class Model {
     static SOFT_ONE       = 0.95;
     static LATENT_SIZE    = 100;
     static BATCH_SIZE     = 10;
-    static IMAGE_SIZE     = 128;
+    static IMAGE_SIZE     = 28;
 
     static tf: typeof tf;
 
@@ -62,39 +60,45 @@ export default class Model {
     static createGenerator() {
         const model = this.tf.sequential();
     
-        model.add(this.tf.layers.dense({ 
-            inputShape: [this.LATENT_SIZE], 
-            units: 8 * 8 * 256, 
-            activation: 'relu'
-        }));
-        model.add(this.tf.layers.reshape({ targetShape: [8, 8, 256] }));
+        // The number of units is chosen so that when the output is reshaped
+        // and fed through the subsequent conv2dTranspose layers, the tensor
+        // that comes out at the end has the exact shape that matches MNIST
+        // images ([28, 28, 1]).
+        model.add(this.tf.layers.dense(
+            {units: 3 * 3 * 384, inputShape: [this.LATENT_SIZE], activation: 'relu'}));
+        model.add(this.tf.layers.reshape({targetShape: [3, 3, 384]}));
 
-        // Deconvolution layers
-        let deconvLayers: ConvLayerArgs[] = [
-            /* reshape to [16, 16, 128] */
-            { filters: 128, kernelSize: 5 },
-            /* reshape to [32, 32,  64] */
-            { filters: 64, kernelSize: 5 }, 
-            /* reshape to [64, 64,  32] */
-            { filters: 32, kernelSize: 5 }, 
-            /* reshape to [128, 128, 1] */
-            { filters: 1, kernelSize: 5, activation: 'tanh' }
-        ];
-
-        // assign default values
-        deconvLayers = deconvLayers.map<ConvLayerArgs>(x => ({
-            kernelInitializer: 'glorotNormal',
+        // Upsample from [3, 3, ...] to [7, 7, ...].
+        model.add(this.tf.layers.conv2dTranspose({
+            filters: 192,
+            kernelSize: 5,
+            strides: 1,
+            padding: 'valid',
             activation: 'relu',
-            padding: 'same',
-            strides: 2,
-            ...x, 
+            kernelInitializer: 'glorotNormal'
         }));
+        model.add(this.tf.layers.batchNormalization());
 
-        deconvLayers.forEach((layerConfig, i) => {
-            model.add(this.tf.layers.conv2dTranspose(layerConfig));
-            if(i == deconvLayers.length-1) return;
-            model.add(this.tf.layers.batchNormalization());
-        });
+        // Upsample to [14, 14, ...].
+        model.add(this.tf.layers.conv2dTranspose({
+            filters: 96,
+            kernelSize: 5,
+            strides: 2,
+            padding: 'same',
+            activation: 'relu',
+            kernelInitializer: 'glorotNormal'
+        }));
+        model.add(this.tf.layers.batchNormalization());
+
+        // Upsample to [28, 28, ...].
+        model.add(this.tf.layers.conv2dTranspose({
+            filters: 1,
+            kernelSize: 5,
+            strides: 2,
+            padding: 'same',
+            activation: 'tanh',
+            kernelInitializer: 'glorotNormal'
+        }));
         
         /**
          * @note
@@ -115,23 +119,33 @@ export default class Model {
     static createDiscriminator() {
         const model = this.tf.sequential();
     
-        // Subsequent convolution layers with increasing filters
-        const convLayers: ConvLayerArgs[] = [
-            { filters: 32,  kernelSize: 8, strides: 2, padding: 'same', inputShape: [this.IMAGE_SIZE, this.IMAGE_SIZE, 1] },
-            { filters: 64,  kernelSize: 8, strides: 1, padding: 'same' },
-            { filters: 128, kernelSize: 5, strides: 2, padding: 'same' },
-            { filters: 256, kernelSize: 3, strides: 1, padding: 'same' }
-        ];
-    
-        convLayers.forEach(layerConfig => {
-            model.add(this.tf.layers.conv2d(layerConfig));
-            model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
-            model.add(this.tf.layers.dropout({ rate: 0.3 }));
-        });
-    
-        // Flatten the output and use a dense layer for classification
+        model.add(this.tf.layers.conv2d({
+            filters: 32,
+            kernelSize: 3,
+            padding: 'same',
+            strides: 2,
+            inputShape: [this.IMAGE_SIZE, this.IMAGE_SIZE, 1]
+        }));
+        model.add(this.tf.layers.leakyReLU({alpha: 0.2}));
+        model.add(this.tf.layers.dropout({rate: 0.3}));
+
+        model.add(this.tf.layers.conv2d(
+            {filters: 64, kernelSize: 3, padding: 'same', strides: 1}));
+        model.add(this.tf.layers.leakyReLU({alpha: 0.2}));
+        model.add(this.tf.layers.dropout({rate: 0.3}));
+
+        model.add(this.tf.layers.conv2d(
+            {filters: 128, kernelSize: 3, padding: 'same', strides: 2}));
+        model.add(this.tf.layers.leakyReLU({alpha: 0.2}));
+        model.add(this.tf.layers.dropout({rate: 0.3}));
+
+        model.add(this.tf.layers.conv2d(
+            {filters: 256, kernelSize: 3, padding: 'same', strides: 1}));
+        model.add(this.tf.layers.leakyReLU({alpha: 0.2}));
+        model.add(this.tf.layers.dropout({rate: 0.3}));
+
         model.add(this.tf.layers.flatten());
-        model.add(this.tf.layers.dense({ units: 1, activation: 'sigmoid' }));
+        model.add(this.tf.layers.dense({units: 1, activation: 'sigmoid'}));
     
         model.compile({
             optimizer: this.tf.train.adam(
