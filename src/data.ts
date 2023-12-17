@@ -46,6 +46,10 @@ export function datasetReader(batchSize: number) {
     // keep a reference of the "previous" tensor to be disposed.
     let previousTensorRef: tf.Tensor = null;
 
+    // keep track of time between yields
+    let tLastYield: number = null;
+    let tCurrYield: number = null;
+
     function* makeIterator() {
         while(true) {
             if(previousTensorRef) {
@@ -72,7 +76,11 @@ export function datasetReader(batchSize: number) {
             batchCount++;
             index += batchSize;
 
-            yield [batchCount, previousTensorRef] as const;
+            tCurrYield = Date.now();
+            tCurrYield -= tLastYield || tCurrYield;
+            tLastYield = Date.now();
+
+            yield [tCurrYield, batchCount, previousTensorRef] as const;
         }
     }
     

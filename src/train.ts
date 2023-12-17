@@ -80,14 +80,15 @@ export default async function beginTraining() {
      * Main training loop.
      */
     for(let epoch = 0; epoch < args.epochs; epoch++) {
-        for(const [batchCount, realBatch] of datasetIterator()) {
+        for(const [took, count, realBatch] of datasetIterator()) {
             const dLoss = await Model.trainDiscriminator(generator, discriminator, realBatch);
             const gLoss = await Model.trainGenerator(combined);
             console.log(
                 `epoch: ${epoch}/${args.epochs} | ` +
-                `batch: ${batchCount} | ` +
+                `batch: ${count} | ` +
                 `dLoss: ${dLoss.toFixed(6)} | `+
-                `gLoss: ${gLoss.toFixed(6)}`);
+                `gLoss: ${gLoss.toFixed(6)} | `+
+                `took: ${took}ms`);
 
             // update loss graphs
             updateGraph('Discriminator loss', dLoss);
