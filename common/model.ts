@@ -14,8 +14,6 @@
  */
 import tf from '@tensorflow/tfjs';
 
-type ConvLayerArgs = Parameters<typeof tf.layers.conv2d>[0];
-
 export default class Model {
     /**
      * constants used during training.
@@ -23,7 +21,7 @@ export default class Model {
     static LEARNING_RATE  = 2e-4;
     static ADAM_BETA1     = 0.5;
     static ADAM_BETA2     = 0.999;
-    static SOFT_ONE       = 0.95;
+    static SOFT_ONE       = 0.9;
     static LATENT_SIZE    = 100;
     static BATCH_SIZE     = 10;
     static IMAGE_SIZE     = 128;
@@ -69,33 +67,49 @@ export default class Model {
         }));
         model.add(this.tf.layers.reshape({ targetShape: [8, 8, 256] }));
 
-        // Deconvolution layers
-        let deconvLayers: ConvLayerArgs[] = [
-            /* reshape to [16, 16, 128] */
-            { filters: 128, kernelSize: 5 },
-            /* reshape to [32, 32,  64] */
-            { filters: 64, kernelSize: 5 }, 
-            /* reshape to [64, 64,  32] */
-            { filters: 32, kernelSize: 5 }, 
-            /* reshape to [128, 128, 1] */
-            { filters: 1, kernelSize: 5, activation: 'tanh' }
-        ];
-
-        // assign default values
-        deconvLayers = deconvLayers.map<ConvLayerArgs>(x => ({
-            kernelInitializer: 'glorotNormal',
-            activation: 'relu',
-            padding: 'same',
+        /* reshape to [16, 16, 128] */
+        model.add(this.tf.layers.conv2dTranspose({
+            filters: 128,
             strides: 2,
-            ...x, 
+            kernelSize: 5,
+            padding: 'same',
+            activation: 'relu',
+            kernelInitializer: 'glorotNormal',
+        }));
+        model.add(this.tf.layers.batchNormalization());
+
+        /* reshape to [32, 32, 64] */
+        model.add(this.tf.layers.conv2dTranspose({
+            filters: 64,
+            strides: 2,
+            kernelSize: 5,
+            padding: 'same',
+            activation: 'relu',
+            kernelInitializer: 'glorotNormal',
+        }));
+        model.add(this.tf.layers.batchNormalization());
+
+        /* reshape to [64, 64, 32] */
+        model.add(this.tf.layers.conv2dTranspose({
+            filters: 32,
+            strides: 2,
+            kernelSize: 5,
+            padding: 'same',
+            activation: 'relu',
+            kernelInitializer: 'glorotNormal',
+        }));
+        model.add(this.tf.layers.batchNormalization());
+
+        /* reshape to [128, 128, 1] */
+        model.add(this.tf.layers.conv2dTranspose({
+            filters: 1,
+            strides: 2,
+            kernelSize: 5,
+            padding: 'same',
+            activation: 'tanh',
+            kernelInitializer: 'glorotNormal',
         }));
 
-        deconvLayers.forEach((layerConfig, i) => {
-            model.add(this.tf.layers.conv2dTranspose(layerConfig));
-            if(i == deconvLayers.length-1) return;
-            model.add(this.tf.layers.batchNormalization());
-        });
-        
         /**
          * @note
          * We don't compile the generator here as it is never trained
@@ -115,19 +129,46 @@ export default class Model {
     static createDiscriminator() {
         const model = this.tf.sequential();
     
-        // Subsequent convolution layers with increasing filters
-        const convLayers: ConvLayerArgs[] = [
-            { filters: 32,  kernelSize: 8, strides: 2, padding: 'same', inputShape: [this.IMAGE_SIZE, this.IMAGE_SIZE, 1] },
-            { filters: 64,  kernelSize: 8, strides: 1, padding: 'same' },
-            { filters: 128, kernelSize: 5, strides: 2, padding: 'same' },
-            { filters: 256, kernelSize: 3, strides: 1, padding: 'same' }
-        ];
-    
-        convLayers.forEach(layerConfig => {
-            model.add(this.tf.layers.conv2d(layerConfig));
-            model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
-            model.add(this.tf.layers.dropout({ rate: 0.3 }));
-        });
+        model.add(this.tf.layers.conv2d({
+            inputShape: [this.IMAGE_SIZE, this.IMAGE_SIZE, 1],
+            filters: 32,
+            strides: 2,
+            kernelSize: 5,
+            padding: 'same',
+            activation: 'relu',
+            kernelInitializer: 'glorotNormal',
+        }));
+        model.add(this.tf.layers.dropout({ rate: 0.3 }));
+
+        model.add(this.tf.layers.conv2d({
+            filters: 64,
+            strides: 2,
+            kernelSize: 5,
+            padding: 'same',
+            activation: 'relu',
+            kernelInitializer: 'glorotNormal',
+        }));
+        model.add(this.tf.layers.dropout({ rate: 0.3 }));
+
+        model.add(this.tf.layers.conv2d({
+            filters: 128,
+            strides: 2,
+            kernelSize: 5,
+            padding: 'same',
+            activation: 'relu',
+            kernelInitializer: 'glorotNormal',
+        }));
+        model.add(this.tf.layers.dropout({ rate: 0.3 }));
+
+        model.add(this.tf.layers.conv2d({
+            filters: 256,
+            strides: 2,
+            kernelSize: 5,
+            padding: 'same',
+            activation: 'relu',
+            kernelInitializer: 'glorotNormal',
+        }));
+        model.add(this.tf.layers.dropout({ rate: 0.3 }));
     
         // Flatten the output and use a dense layer for classification
         model.add(this.tf.layers.flatten());

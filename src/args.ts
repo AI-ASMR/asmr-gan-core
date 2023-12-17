@@ -16,6 +16,8 @@ const pargv = minimist(process.argv.slice(2));
  */
 const options = {
     'h': [ 'h', 'help',          'boolean' ],
+    'd': [ 'd', 'dataset',       'string'  ],
+    'i': [ 'i', 'inputs',        'string'  ],
     'e': [ 'e', 'epochs',        'number'  ],
     's': [ 's', 'batch-size',    'number'  ],
     'l': [ 'l', 'learning-rate', 'number'  ],
@@ -55,6 +57,8 @@ const s = (s?:OptionsAny) => (''+s).toLowerCase()=='true'?undefined:''+s;
 [define arguments]      [if passed]  [if set]   [if not set]  [if not passed]
 *****************************************************************************/
 parsed['help']          = a('h') ?   b(a('h'))  ?? true       : false;
+parsed['dataset']       = a('d') ?   s(a('d'))  ?? undefined  : undefined;
+parsed['inputs']        = a('i') ?   s(a('i'))  ?? undefined  : undefined;
 parsed['epochs']        = a('e') ?   n(a('e'))  ?? Infinity   : Infinity;
 parsed['batch-size']    = a('s') ?   n(a('s'))  ?? undefined  : undefined; /* defined in @common/model.ts */
 parsed['learning-rate'] = a('l') ?   n(a('l'))  ?? undefined  : undefined; /* defined in @common/model.ts */
@@ -70,6 +74,8 @@ function printHelpMessage() {
     console.log('\nUsage: <path/to/executable> <options>');
     console.log('\nOptions:');
     console.log('\t-h, --help               Print this help message.');
+    console.log('\t-d, --dataset            Reads (creates if non-existent) dataset file.');
+    console.log('\t-i, --inputs             Specify the path to the inputs files used to generate the dataset.');
     console.log('\t-e, --epochs             Number of epochs. (Default: Infinity, until SIGINT)');
     console.log('\t-s, --batch-size         Batch size to use each epoch. (Default: 32)');
     console.log('\t-l, --learning-rate      Set the learning rate. (Default: 2e-4)');
