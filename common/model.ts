@@ -26,6 +26,7 @@ export default class Model {
     static BATCH_SIZE     = 10;
     static IMAGE_SIZE     = 128;
     static RANDOM_SEED    = Math.random();
+    static DREG_SCALE     = 0.0001;
 
     static tf: typeof tf;
 
@@ -55,10 +56,31 @@ export default class Model {
     }
 
     /**
-     * Returns a seeded weights normalized that must be used for every layer.
+     * Returns a seeded weights initializer that must be used for every layer.
      */
     static get weightsInitializer() {
         return this.tf.initializers.glorotNormal({ seed: this.RANDOM_SEED });
+    }
+
+    /**
+     * Returns a kernel regularizer that reduces overfitting by penalizing weights 
+     * with large magnitudes.
+     */
+    static get kernelRegularizer() {
+        return this.tf.regularizers.l2({ l2: this.DREG_SCALE });
+    }
+
+    /**
+     * Returns a constant bias initializer that must be used for every layer.
+     * 
+     * @note
+     * This will allow the algorithm to learn its own bias. Keeping a large bias initially, 
+     * without any prominent reason, can make the training process extremely slow as the 
+     * Bias would influence the cost so much that other variables will not see their effects 
+     * (and hence gradient) correctly.
+     */
+    static get biasInitializer() {
+        return this.tf.initializers.constant({ value: 0 });
     }
 
     /**
@@ -76,20 +98,25 @@ export default class Model {
     
         model.add(this.tf.layers.dense({ 
             inputShape: [this.LATENT_SIZE], 
-            units: 8 * 8 * 256, 
+            units: 8 * 8 * 512, 
             activation: 'relu',
-            kernelInitializer: this.weightsInitializer
+            kernelInitializer: this.weightsInitializer,
+            kernelRegularizer: this.kernelRegularizer,
+            biasInitializer: this.biasInitializer,
         }));
-        model.add(this.tf.layers.reshape({ targetShape: [8, 8, 256] }));
+        model.add(this.tf.layers.batchNormalization());
+        model.add(this.tf.layers.reshape({ targetShape: [8, 8, 512] }));
 
         /* reshape to [16, 16, 128] */
         model.add(this.tf.layers.conv2dTranspose({
             filters: 128,
             strides: 2,
-            kernelSize: 5,
+            kernelSize: 9,
             padding: 'same',
             activation: 'relu',
             kernelInitializer: this.weightsInitializer,
+            kernelRegularizer: this.kernelRegularizer,
+            biasInitializer: this.biasInitializer,
         }));
         model.add(this.tf.layers.batchNormalization());
 
@@ -97,10 +124,12 @@ export default class Model {
         model.add(this.tf.layers.conv2dTranspose({
             filters: 64,
             strides: 2,
-            kernelSize: 5,
+            kernelSize: 7,
             padding: 'same',
             activation: 'relu',
             kernelInitializer: this.weightsInitializer,
+            kernelRegularizer: this.kernelRegularizer,
+            biasInitializer: this.biasInitializer,
         }));
         model.add(this.tf.layers.batchNormalization());
 
@@ -112,6 +141,22 @@ export default class Model {
             padding: 'same',
             activation: 'relu',
             kernelInitializer: this.weightsInitializer,
+            kernelRegularizer: this.kernelRegularizer,
+            biasInitializer: this.biasInitializer,
+        }));
+        model.add(this.tf.layers.batchNormalization());
+
+        /* additional convolution layer to mitigate the checkerboard effect */
+        /* keep same shape [64, 64, 32] */
+        model.add(this.tf.layers.conv2d({
+            filters: 32,
+            kernelSize: 3,
+            strides: 1,
+            padding: 'same',
+            activation: 'relu',
+            kernelInitializer: this.weightsInitializer,
+            kernelRegularizer: this.kernelRegularizer,
+            biasInitializer: this.biasInitializer,
         }));
         model.add(this.tf.layers.batchNormalization());
 
@@ -119,10 +164,12 @@ export default class Model {
         model.add(this.tf.layers.conv2dTranspose({
             filters: 1,
             strides: 2,
-            kernelSize: 5,
+            kernelSize: 3,
             padding: 'same',
             activation: 'tanh',
             kernelInitializer: this.weightsInitializer,
+            kernelRegularizer: this.kernelRegularizer,
+            biasInitializer: this.biasInitializer,
         }));
 
         /**
@@ -148,21 +195,26 @@ export default class Model {
             inputShape: [this.IMAGE_SIZE, this.IMAGE_SIZE, 1],
             filters: 32,
             strides: 2,
-            kernelSize: 5,
+            kernelSize: 9,
             padding: 'same',
-            activation: 'relu',
             kernelInitializer: this.weightsInitializer,
+            kernelRegularizer: this.kernelRegularizer,
+            biasInitializer: this.biasInitializer,
         }));
+        model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
         model.add(this.tf.layers.dropout({ rate: 0.3, seed: this.RANDOM_SEED }));
 
         model.add(this.tf.layers.conv2d({
             filters: 64,
             strides: 2,
-            kernelSize: 5,
+            kernelSize: 7,
             padding: 'same',
-            activation: 'relu',
             kernelInitializer: this.weightsInitializer,
+            kernelRegularizer: this.kernelRegularizer,
+            biasInitializer: this.biasInitializer,
         }));
+        model.add(this.tf.layers.batchNormalization());
+        model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
         model.add(this.tf.layers.dropout({ rate: 0.3, seed: this.RANDOM_SEED }));
 
         model.add(this.tf.layers.conv2d({
@@ -170,19 +222,38 @@ export default class Model {
             strides: 2,
             kernelSize: 5,
             padding: 'same',
-            activation: 'relu',
             kernelInitializer: this.weightsInitializer,
+            kernelRegularizer: this.kernelRegularizer,
+            biasInitializer: this.biasInitializer,
         }));
+        model.add(this.tf.layers.batchNormalization());
+        model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
         model.add(this.tf.layers.dropout({ rate: 0.3, seed: this.RANDOM_SEED }));
 
         model.add(this.tf.layers.conv2d({
             filters: 256,
             strides: 2,
-            kernelSize: 5,
+            kernelSize: 3,
             padding: 'same',
-            activation: 'relu',
             kernelInitializer: this.weightsInitializer,
+            kernelRegularizer: this.kernelRegularizer,
+            biasInitializer: this.biasInitializer,
         }));
+        model.add(this.tf.layers.batchNormalization());
+        model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
+        model.add(this.tf.layers.dropout({ rate: 0.3, seed: this.RANDOM_SEED }));
+
+        model.add(this.tf.layers.conv2d({
+            filters: 512,
+            strides: 2,
+            kernelSize: 3,
+            padding: 'same',
+            kernelInitializer: this.weightsInitializer,
+            kernelRegularizer: this.kernelRegularizer,
+            biasInitializer: this.biasInitializer,
+        }));
+        model.add(this.tf.layers.batchNormalization());
+        model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
         model.add(this.tf.layers.dropout({ rate: 0.3, seed: this.RANDOM_SEED }));
     
         // Flatten the output and use a dense layer for classification
@@ -190,7 +261,9 @@ export default class Model {
         model.add(this.tf.layers.dense({ 
             units: 1, 
             activation: 'sigmoid', 
-            kernelInitializer: this.weightsInitializer 
+            kernelInitializer: this.weightsInitializer,
+            kernelRegularizer: this.kernelRegularizer,
+            biasInitializer: this.biasInitializer,
         }));
     
         model.compile({
