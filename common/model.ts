@@ -100,9 +100,9 @@ export default class Model {
         }));
         model.add(this.tf.layers.batchNormalization());
 
-        /* reshape to [128, 128, 1] */
+        /* reshape to [128, 128, 3] */
         model.add(this.tf.layers.conv2dTranspose({
-            filters: 1,
+            filters: 3,
             strides: 2,
             kernelSize: 5,
             padding: 'same',
@@ -130,7 +130,7 @@ export default class Model {
         const model = this.tf.sequential();
     
         model.add(this.tf.layers.conv2d({
-            inputShape: [this.IMAGE_SIZE, this.IMAGE_SIZE, 1],
+            inputShape: [this.IMAGE_SIZE, this.IMAGE_SIZE, 3],
             filters: 32,
             strides: 2,
             kernelSize: 5,

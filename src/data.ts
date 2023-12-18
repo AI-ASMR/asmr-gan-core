@@ -5,7 +5,7 @@ import * as tf from './tensorflow';
 import Model from '@common/model';
 import { args } from './args';
 
-const DATASET_SIZE = 10_000;
+const DATASET_SIZE = 1_000;
 
 /**
  * This function is used to step over the entire dataset by `batchSize`
@@ -67,7 +67,7 @@ export function datasetReader(batchSize: number) {
                     ? DATASET_SIZE - index 
                     : batchSize;
                 const tensor = dataset.slice(index, actualBatchSize);
-                const batch = tensor.reshape([actualBatchSize, Model.IMAGE_SIZE, Model.IMAGE_SIZE, 1]) as tf.Tensor4D;
+                const batch = tensor.reshape([actualBatchSize, Model.IMAGE_SIZE, Model.IMAGE_SIZE, 3]) as tf.Tensor4D;
                 return batch;
             });
     
@@ -99,7 +99,7 @@ export function datasetReader(batchSize: number) {
  */
 function loadDataset() {
     // shape of the tensor this function returns.
-    const shape = [DATASET_SIZE, Model.IMAGE_SIZE, Model.IMAGE_SIZE, 1];
+    const shape = [DATASET_SIZE, Model.IMAGE_SIZE, Model.IMAGE_SIZE, 3];
 
     return tf.tidy(() => {
         if(!args.dataset) {
@@ -136,13 +136,11 @@ function loadDataset() {
     
             const inputsPath = path.resolve(args.inputs);
     
-            // function to load an image and convert it to grayscale
-            const loadImageAsGrayscale = (imagePath: PathLike) => {
+            // function to load an image
+            const loadImage = (imagePath: PathLike) => {
                 return tf.tidy(() => {
                     const fileContents = fs.readFileSync(imagePath);
                     let imgTensor = tf.node.decodeImage(fileContents, 3);
-                    imgTensor = imgTensor.mean(2);              // Averaging across channels to get grayscale
-                    imgTensor = imgTensor.expandDims(-1);       // Adding the channel dimension back
                     imgTensor = imgTensor.toFloat().div(255);   // Normalize the tensor values to [0, 1]
                     imgTensor = imgTensor.sub(0.5).mul(2);      // Scale to [-1, 1]
                     return imgTensor;
@@ -169,23 +167,23 @@ function loadDataset() {
             };
    
             const fileNames = fs.readdirSync(inputsPath);
-            const grayscaleTensors = [];
+            const tensorsArray = [];
     
             let i = 0;
 
             for (const fileName of fileNames) {
-                if (path.extname(fileName).toLowerCase() === '.png') {
+                if (['.png','.jpg'].includes(path.extname(fileName).toLowerCase())) {
                     if(i++ == DATASET_SIZE) {
                         break;
                     }
                     console.log(`[${i}] reading ${fileName}`);
                     const imagePath = path.join(inputsPath, fileName);
-                    grayscaleTensors.push(loadImageAsGrayscale(imagePath));
+                    tensorsArray.push(loadImage(imagePath));
                 }
             }
 
             // save the tensors into a single one
-            const binTensor = mergeTensors(grayscaleTensors);
+            const binTensor = mergeTensors(tensorsArray);
             saveTensor(binTensor, datasetPath);
             console.log(`Saved ${datasetPath}`);
             return binTensor.reshape(shape);
