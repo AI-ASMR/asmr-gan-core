@@ -27,7 +27,7 @@ export default class Model {
     static IMAGE_SIZE     = 128;
     static RANDOM_SEED    = undefined;
     static DREG_SCALE     = 0.001;
-    static CHANNELS       = 1;
+    static CHANNELS       = 3;
 
     static tf: typeof tf;
 
