@@ -83,6 +83,9 @@ function printHelpMessage() {
     console.log('\t-d, --dataset            Reads (creates if non-existent) dataset file.');
     console.log('\t-i, --inputs             Specify the path to the inputs files used to generate the dataset.');
     console.log('\t-e, --epochs             Number of epochs. (Default: Infinity, until SIGINT)');
+    console.log('\t-q, --dataset-size       Size of dataset used (or generated). (Default: 1000)');
+    console.log('\t-n, --channels           Number of image channels. Default is 3 for RGB.');
+    console.log('\t-r, --seed               Optional seed number used during random generation.');
     console.log('\t-s, --batch-size         Batch size to use each epoch. (Default: 32)');
     console.log('\t-l, --learning-rate      Set the learning rate. (Default: 2e-4)');
     console.log('\t-b, --tensorboard        Update tensorboard graphs while training at the given path.');
