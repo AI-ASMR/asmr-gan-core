@@ -3,6 +3,7 @@ import path from 'path';
 
 import { args } from './args';
 import * as tf from './tensorflow';
+import Model from '@common/model';
 
 let previewPath: PathLike;
 let samplePath: PathLike;
@@ -35,7 +36,7 @@ export async function updatePreview(
 
     const imgTensor = tf.tidy(() => {
         const img = rawImage.map(x => ((x + 1) / 2) * 255);
-        const imgTensor = tf.tensor(img).reshape([PREVIEW_SCALE, PREVIEW_SCALE, 1]);
+        const imgTensor = tf.tensor(img).reshape([PREVIEW_SCALE, PREVIEW_SCALE, Model.CHANNELS]);
         return imgTensor;
     }) as tf.Tensor3D;
     const pngData = await tf.node.encodePng(imgTensor, 0);

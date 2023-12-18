@@ -25,8 +25,9 @@ export default class Model {
     static LATENT_SIZE    = 100;
     static BATCH_SIZE     = 10;
     static IMAGE_SIZE     = 128;
-    static RANDOM_SEED    = Math.random();
-    static DREG_SCALE     = 0.0001;
+    static RANDOM_SEED    = undefined;
+    static DREG_SCALE     = 0.001;
+    static CHANNELS       = 1;
 
     static tf: typeof tf;
 
@@ -47,12 +48,14 @@ export default class Model {
         _tf: typeof tf, 
         learningRate = this.LEARNING_RATE, 
         batchSize = this.BATCH_SIZE, 
-        seed = this.RANDOM_SEED) 
+        seed = this.RANDOM_SEED,
+        channels = this.CHANNELS) 
     {
         Model.tf = _tf;
         Model.LEARNING_RATE = learningRate;
         Model.BATCH_SIZE = batchSize;
         Model.RANDOM_SEED = seed;
+        Model.CHANNELS = channels;
     }
 
     /**
@@ -85,9 +88,11 @@ export default class Model {
 
     /**
      * Creates a typical generator model using convolution layers.
-     * Outputs a shape of [x, x, 1] where `x` is @see Model.IMAGE_SIZE
+     * Outputs a shape of [x, x, y] where `x` is @see Model.IMAGE_SIZE
+     * and where y is the number channels @see Model.CHANNELS.
      * 
-     * The image is grayscale (as apparent by the 1 channel in the shape).
+     * @note typically one channel means grayscale, 3 channels means RGB.
+     * 
      * The values are in the range of -1 to 1 using `tanh` as activation
      * for the last layer.
      * 
@@ -147,9 +152,9 @@ export default class Model {
         model.add(this.tf.layers.batchNormalization());
 
         /* additional convolution layer to mitigate the checkerboard effect */
-        /* keep same shape [64, 64, 32] */
+        /* keep same 64x64 shape */
         model.add(this.tf.layers.conv2d({
-            filters: 32,
+            filters: 128,
             kernelSize: 3,
             strides: 1,
             padding: 'same',
@@ -160,9 +165,9 @@ export default class Model {
         }));
         model.add(this.tf.layers.batchNormalization());
 
-        /* reshape to [128, 128, 1] */
+        /* reshape to [128, 128, channels] */
         model.add(this.tf.layers.conv2dTranspose({
-            filters: 1,
+            filters: this.CHANNELS,
             strides: 2,
             kernelSize: 3,
             padding: 'same',
@@ -192,7 +197,7 @@ export default class Model {
         const model = this.tf.sequential();
     
         model.add(this.tf.layers.conv2d({
-            inputShape: [this.IMAGE_SIZE, this.IMAGE_SIZE, 1],
+            inputShape: [this.IMAGE_SIZE, this.IMAGE_SIZE, this.CHANNELS],
             filters: 32,
             strides: 2,
             kernelSize: 9,

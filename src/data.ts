@@ -5,7 +5,7 @@ import * as tf from './tensorflow';
 import Model from '@common/model';
 import { args } from './args';
 
-const DATASET_SIZE = 22;
+export let DATASET_SIZE = 1000;
 
 /**
  * This function is used to step over the entire dataset by `batchSize`
@@ -35,6 +35,8 @@ const DATASET_SIZE = 22;
  * }
  */
 export function datasetReader(batchSize: number) {
+    DATASET_SIZE = args['dataset-size'] || DATASET_SIZE;
+
     // load the dataset into memory
     const dataset = loadDataset();
 
@@ -67,7 +69,8 @@ export function datasetReader(batchSize: number) {
                     ? DATASET_SIZE - index 
                     : batchSize;
                 const tensor = dataset.slice(index, actualBatchSize);
-                const batch = tensor.reshape([actualBatchSize, Model.IMAGE_SIZE, Model.IMAGE_SIZE, 1]) as tf.Tensor4D;
+                const batch = tensor.reshape([
+                    actualBatchSize, Model.IMAGE_SIZE, Model.IMAGE_SIZE, Model.CHANNELS]) as tf.Tensor4D;
                 return batch;
             });
     
@@ -99,7 +102,7 @@ export function datasetReader(batchSize: number) {
  */
 function loadDataset() {
     // shape of the tensor this function returns.
-    const shape = [DATASET_SIZE, Model.IMAGE_SIZE, Model.IMAGE_SIZE, 1];
+    const shape = () => [DATASET_SIZE, Model.IMAGE_SIZE, Model.IMAGE_SIZE, Model.CHANNELS];
 
     return tf.tidy(() => {
         if(!args.dataset) {
@@ -121,7 +124,7 @@ function loadDataset() {
             console.log('loading dataset from disk into memory...');
     
             const array = new Float32Array(fs.readFileSync(datasetPath).buffer);
-            return tf.tensor(array).reshape(shape);
+            return tf.tensor(array).reshape(shape());
         }
         else { 
             /**
@@ -136,13 +139,16 @@ function loadDataset() {
     
             const inputsPath = path.resolve(args.inputs);
     
-            // function to load an image and convert it to grayscale
-            const loadImageAsGrayscale = (imagePath: PathLike) => {
+            // function to load an image, (optionally) convert it to grayscale
+            // and normalize in the range of -1 to 1.
+            const loadImage = (imagePath: PathLike) => {
                 return tf.tidy(() => {
                     const fileContents = fs.readFileSync(imagePath);
                     let imgTensor = tf.node.decodeImage(fileContents, 3);
-                    imgTensor = imgTensor.mean(2);              // Averaging across channels to get grayscale
-                    imgTensor = imgTensor.expandDims(-1);       // Adding the channel dimension back
+                    if(Model.CHANNELS === 1) {
+                        imgTensor = imgTensor.mean(2);          // Averaging across channels to get grayscale
+                        imgTensor = imgTensor.expandDims(-1);   // Adding the channel dimension back
+                    }
                     imgTensor = imgTensor.toFloat().div(255);   // Normalize the tensor values to [0, 1]
                     imgTensor = imgTensor.sub(0.5).mul(2);      // Scale to [-1, 1]
                     return imgTensor;
@@ -175,20 +181,21 @@ function loadDataset() {
 
             for (const fileName of fileNames) {
                 if (['.png','.jpg'].includes(path.extname(fileName).toLowerCase())) {
-                    if(i++ == DATASET_SIZE) {
-                        break;
-                    }
                     console.log(`[${i}] reading ${fileName}`);
                     const imagePath = path.join(inputsPath, fileName);
-                    grayscaleTensors.push(loadImageAsGrayscale(imagePath));
+                    grayscaleTensors.push(loadImage(imagePath));
+                    if(++i == DATASET_SIZE) break;
                 }
             }
+
+            // i could be less than dataset size which will mess up the tensors
+            DATASET_SIZE = i;
 
             // save the tensors into a single one
             const binTensor = mergeTensors(grayscaleTensors);
             saveTensor(binTensor, datasetPath);
             console.log(`Saved ${datasetPath}`);
-            return binTensor.reshape(shape);
+            return binTensor.reshape(shape());
         }
     });
 }

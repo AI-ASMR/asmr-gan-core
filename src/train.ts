@@ -59,8 +59,8 @@ export default async function beginTraining() {
      */
     const getImageFromBatch = (batch: tf.Tensor) => {
         return tf.tidy(() => {
-            const imageTensor = batch.dataSync().slice(0, Model.IMAGE_SIZE*Model.IMAGE_SIZE);
-            const imageReshaped = tf.tensor4d(imageTensor, [1, Model.IMAGE_SIZE, Model.IMAGE_SIZE, 1]);
+            const imageTensor = batch.dataSync().slice(0, Model.IMAGE_SIZE*Model.IMAGE_SIZE*Model.CHANNELS);
+            const imageReshaped = tf.tensor4d(imageTensor, [1, Model.IMAGE_SIZE, Model.IMAGE_SIZE, Model.CHANNELS]);
             return imageReshaped;
         });
     };

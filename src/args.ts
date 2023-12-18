@@ -17,7 +17,9 @@ const pargv = minimist(process.argv.slice(2));
 const options = {
     'h': [ 'h', 'help',          'boolean' ],
     'd': [ 'd', 'dataset',       'string'  ],
+    'q': [ 'q', 'dataset-size',  'number'  ],
     'i': [ 'i', 'inputs',        'string'  ],
+    'n': [ 'n', 'channels',      'number'  ],
     'e': [ 'e', 'epochs',        'number'  ],
     's': [ 's', 'batch-size',    'number'  ],
     'r': [ 'r', 'seed',          'number'  ],
@@ -61,6 +63,8 @@ parsed['help']          = a('h') ?   b(a('h'))  ?? true       : false;
 parsed['dataset']       = a('d') ?   s(a('d'))  ?? undefined  : undefined;
 parsed['inputs']        = a('i') ?   s(a('i'))  ?? undefined  : undefined;
 parsed['epochs']        = a('e') ?   n(a('e'))  ?? Infinity   : Infinity;
+parsed['dataset-size']  = a('q') ?   n(a('q'))  ?? undefined  : undefined; /* defined in @bin/data.ts */
+parsed['channels']      = a('n') ?   n(a('n'))  ?? undefined  : undefined; /* defined in @common/model.ts */
 parsed['seed']          = a('r') ?   n(a('r'))  ?? undefined  : undefined; /* defined in @common/model.ts */
 parsed['batch-size']    = a('s') ?   n(a('s'))  ?? undefined  : undefined; /* defined in @common/model.ts */
 parsed['learning-rate'] = a('l') ?   n(a('l'))  ?? undefined  : undefined; /* defined in @common/model.ts */
