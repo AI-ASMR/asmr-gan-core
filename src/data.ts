@@ -29,7 +29,7 @@ export let DATASET_SIZE = 1000;
  * const getIterator = datasetReader(1000, 50);
  * 
  * for(let epoch = 0; epoch < 1000; epoch++) {
- *   for(const [batchCount, batch] of getIterator()) {
+ *   for(const [timeTook, batchCount, batch] of getIterator()) {
  *      // do something with the batch of data.
  *   }
  * }
