@@ -174,7 +174,7 @@ function loadDataset() {
             let i = 0;
 
             for (const fileName of fileNames) {
-                if (path.extname(fileName).toLowerCase() === '.png') {
+                if (['.png','.jpg'].includes(path.extname(fileName).toLowerCase())) {
                     if(i++ == DATASET_SIZE) {
                         break;
                     }
