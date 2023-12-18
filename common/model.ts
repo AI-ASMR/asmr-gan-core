@@ -25,6 +25,7 @@ export default class Model {
     static LATENT_SIZE    = 100;
     static BATCH_SIZE     = 10;
     static IMAGE_SIZE     = 128;
+    static RANDOM_SEED    = Math.random();
 
     static tf: typeof tf;
 
@@ -41,10 +42,23 @@ export default class Model {
      * // or
      * Model.configure(require('@tensorflow/tfjs-node-gpu'), ...);
      */
-    static configure(_tf: typeof tf, learningRate = this.LEARNING_RATE, batchSize = this.BATCH_SIZE) {
+    static configure(
+        _tf: typeof tf, 
+        learningRate = this.LEARNING_RATE, 
+        batchSize = this.BATCH_SIZE, 
+        seed = this.RANDOM_SEED) 
+    {
         Model.tf = _tf;
         Model.LEARNING_RATE = learningRate;
         Model.BATCH_SIZE = batchSize;
+        Model.RANDOM_SEED = seed;
+    }
+
+    /**
+     * Returns a seeded weights normalized that must be used for every layer.
+     */
+    static get weightsInitializer() {
+        return this.tf.initializers.glorotNormal({ seed: this.RANDOM_SEED });
     }
 
     /**
@@ -63,7 +77,8 @@ export default class Model {
         model.add(this.tf.layers.dense({ 
             inputShape: [this.LATENT_SIZE], 
             units: 8 * 8 * 256, 
-            activation: 'relu'
+            activation: 'relu',
+            kernelInitializer: this.weightsInitializer
         }));
         model.add(this.tf.layers.reshape({ targetShape: [8, 8, 256] }));
 
@@ -74,7 +89,7 @@ export default class Model {
             kernelSize: 5,
             padding: 'same',
             activation: 'relu',
-            kernelInitializer: 'glorotNormal',
+            kernelInitializer: this.weightsInitializer,
         }));
         model.add(this.tf.layers.batchNormalization());
 
@@ -85,7 +100,7 @@ export default class Model {
             kernelSize: 5,
             padding: 'same',
             activation: 'relu',
-            kernelInitializer: 'glorotNormal',
+            kernelInitializer: this.weightsInitializer,
         }));
         model.add(this.tf.layers.batchNormalization());
 
@@ -96,7 +111,7 @@ export default class Model {
             kernelSize: 5,
             padding: 'same',
             activation: 'relu',
-            kernelInitializer: 'glorotNormal',
+            kernelInitializer: this.weightsInitializer,
         }));
         model.add(this.tf.layers.batchNormalization());
 
@@ -107,7 +122,7 @@ export default class Model {
             kernelSize: 5,
             padding: 'same',
             activation: 'tanh',
-            kernelInitializer: 'glorotNormal',
+            kernelInitializer: this.weightsInitializer,
         }));
 
         /**
@@ -136,9 +151,9 @@ export default class Model {
             kernelSize: 5,
             padding: 'same',
             activation: 'relu',
-            kernelInitializer: 'glorotNormal',
+            kernelInitializer: this.weightsInitializer,
         }));
-        model.add(this.tf.layers.dropout({ rate: 0.3 }));
+        model.add(this.tf.layers.dropout({ rate: 0.3, seed: this.RANDOM_SEED }));
 
         model.add(this.tf.layers.conv2d({
             filters: 64,
@@ -146,9 +161,9 @@ export default class Model {
             kernelSize: 5,
             padding: 'same',
             activation: 'relu',
-            kernelInitializer: 'glorotNormal',
+            kernelInitializer: this.weightsInitializer,
         }));
-        model.add(this.tf.layers.dropout({ rate: 0.3 }));
+        model.add(this.tf.layers.dropout({ rate: 0.3, seed: this.RANDOM_SEED }));
 
         model.add(this.tf.layers.conv2d({
             filters: 128,
@@ -156,9 +171,9 @@ export default class Model {
             kernelSize: 5,
             padding: 'same',
             activation: 'relu',
-            kernelInitializer: 'glorotNormal',
+            kernelInitializer: this.weightsInitializer,
         }));
-        model.add(this.tf.layers.dropout({ rate: 0.3 }));
+        model.add(this.tf.layers.dropout({ rate: 0.3, seed: this.RANDOM_SEED }));
 
         model.add(this.tf.layers.conv2d({
             filters: 256,
@@ -166,13 +181,17 @@ export default class Model {
             kernelSize: 5,
             padding: 'same',
             activation: 'relu',
-            kernelInitializer: 'glorotNormal',
+            kernelInitializer: this.weightsInitializer,
         }));
-        model.add(this.tf.layers.dropout({ rate: 0.3 }));
+        model.add(this.tf.layers.dropout({ rate: 0.3, seed: this.RANDOM_SEED }));
     
         // Flatten the output and use a dense layer for classification
         model.add(this.tf.layers.flatten());
-        model.add(this.tf.layers.dense({ units: 1, activation: 'sigmoid' }));
+        model.add(this.tf.layers.dense({ 
+            units: 1, 
+            activation: 'sigmoid', 
+            kernelInitializer: this.weightsInitializer 
+        }));
     
         model.compile({
             optimizer: this.tf.train.adam(
@@ -242,7 +261,8 @@ export default class Model {
     static async trainGenerator(combined: tf.LayersModel) {
         const [noise, trick] = this.tf.tidy(() => {
             // make new latent vectors.
-            const zVectors = this.tf.randomUniform([this.BATCH_SIZE*2, this.LATENT_SIZE], -1, 1);
+            const zVectors = this.tf.randomUniform(
+                [this.BATCH_SIZE*2, this.LATENT_SIZE], -1, 1, undefined, this.RANDOM_SEED);
         
             // we want fakes to be discriminated as real.
             const trick = this.tf.tidy(() => this.tf.ones([this.BATCH_SIZE*2, 1]).mul(this.SOFT_ONE));
@@ -280,7 +300,7 @@ export default class Model {
         const [x, y] = this.tf.tidy(() => {
             // create random noise for generator's input
             const zVectors = this.tf.randomUniform(
-                [REAL_BATCH_SIZE, this.LATENT_SIZE], -1, 1);
+                [REAL_BATCH_SIZE, this.LATENT_SIZE], -1, 1, undefined, this.RANDOM_SEED);
         
             // create many 'fake' images
             const generatedImages = generator.predict(zVectors, { 

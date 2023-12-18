@@ -20,6 +20,7 @@ const options = {
     'i': [ 'i', 'inputs',        'string'  ],
     'e': [ 'e', 'epochs',        'number'  ],
     's': [ 's', 'batch-size',    'number'  ],
+    'r': [ 'r', 'seed',          'number'  ],
     'l': [ 'l', 'learning-rate', 'number'  ],
     'b': [ 'b', 'tensorboard',   'string'  ],
     'p': [ 'p', 'preview',       'string'  ],
@@ -60,6 +61,7 @@ parsed['help']          = a('h') ?   b(a('h'))  ?? true       : false;
 parsed['dataset']       = a('d') ?   s(a('d'))  ?? undefined  : undefined;
 parsed['inputs']        = a('i') ?   s(a('i'))  ?? undefined  : undefined;
 parsed['epochs']        = a('e') ?   n(a('e'))  ?? Infinity   : Infinity;
+parsed['seed']          = a('r') ?   n(a('r'))  ?? undefined  : undefined; /* defined in @common/model.ts */
 parsed['batch-size']    = a('s') ?   n(a('s'))  ?? undefined  : undefined; /* defined in @common/model.ts */
 parsed['learning-rate'] = a('l') ?   n(a('l'))  ?? undefined  : undefined; /* defined in @common/model.ts */
 parsed['tensorboard']   = a('b') ?   s(a('b'))  ?? undefined  : undefined;

@@ -70,7 +70,8 @@ export default async function beginTraining() {
      */
     const getImageFromModel = () => {
         return tf.tidy(() => {
-            const noiseTensor = tf.tidy(() => tf.randomUniform([1, Model.LATENT_SIZE], -1, 1));
+            const noiseTensor = tf.tidy(() => tf.randomUniform(
+                [1, Model.LATENT_SIZE], -1, 1, undefined, Model.RANDOM_SEED));
             const imageTensor = generator.predict(noiseTensor) as tf.Tensor4D;
             return imageTensor;
         });

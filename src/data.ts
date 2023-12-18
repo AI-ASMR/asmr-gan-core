@@ -5,7 +5,7 @@ import * as tf from './tensorflow';
 import Model from '@common/model';
 import { args } from './args';
 
-const DATASET_SIZE = 10_000;
+const DATASET_SIZE = 22;
 
 /**
  * This function is used to step over the entire dataset by `batchSize`
