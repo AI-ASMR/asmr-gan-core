@@ -26,7 +26,7 @@ export let DATASET_SIZE = 1000;
  * @returns {function} a function that returns a new iterator.
  * 
  * @example
- * const getIterator = datasetReader(1000, 50);
+ * const getIterator = datasetReader(50);
  * 
  * for(let epoch = 0; epoch < 1000; epoch++) {
  *   for(const [timeTook, batchCount, batch] of getIterator()) {
