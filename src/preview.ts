@@ -14,9 +14,9 @@ if(args.preview) {
     previewPath = path.resolve(args.preview);
     samplePath = path.resolve(previewPath.replace('.png', '.sample.png'));
     console.log('\n\n# to view live preview');
-    console.log(`$ feh -Z -g ${PREVIEW_SCALE}x${PREVIEW_SCALE} --reload 1 ${previewPath}`);
+    console.log(`$ feh -Z -g ${PREVIEW_SCALE}x${PREVIEW_SCALE} ${previewPath}`);
     console.log('\n\n# to view live (dataset) samples');
-    console.log(`$ feh -Z -g ${PREVIEW_SCALE}x${PREVIEW_SCALE} --reload 1 ${samplePath}`);
+    console.log(`$ feh -Z -g ${PREVIEW_SCALE}x${PREVIEW_SCALE} ${samplePath}`);
 }
 
 /**

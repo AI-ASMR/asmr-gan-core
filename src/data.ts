@@ -151,6 +151,8 @@ function loadDataset() {
                     }
                     imgTensor = imgTensor.toFloat().div(255);   // Normalize the tensor values to [0, 1]
                     imgTensor = imgTensor.sub(0.5).mul(2);      // Scale to [-1, 1]
+                    imgTensor = imgTensor.resizeBilinear(       // Resize to model's image size (in case it's not). 
+                        [Model.IMAGE_SIZE, Model.IMAGE_SIZE]);
                     return imgTensor;
                 });
             };
@@ -180,7 +182,7 @@ function loadDataset() {
             let i = 0;
 
             for (const fileName of fileNames) {
-                if (['.png','.jpg'].includes(path.extname(fileName).toLowerCase())) {
+                if (['.png','.jpg','.jpeg'].includes(path.extname(fileName).toLowerCase())) {
                     console.log(`[${i}] reading ${fileName}`);
                     const imagePath = path.join(inputsPath, fileName);
                     grayscaleTensors.push(loadImage(imagePath));
