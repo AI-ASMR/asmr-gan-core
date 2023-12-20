@@ -4,16 +4,26 @@
         "aimr",
         "asmr",
         "CUDA",
+        "deconv",
+        "Deconvolution",
+        "deconvolutional",
         "diamondyuan",
+        "dtype",
         "gbprc",
+        "gprc",
         "gulpfile",
         "ifdef",
         "Kushev",
+        "nocheck",
         "npmjs",
         "oneline",
+        "overfitting",
         "pargv",
+        "pngjs",
         "preinstall",
+        "regularizers",
         "Stiliyan",
-        "StiliyanKushev"
+        "StiliyanKushev",
+        "upsampled"
     ]
 }

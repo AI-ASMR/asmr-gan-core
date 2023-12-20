@@ -1,39 +1,32 @@
-/// #if DEV
-import * as tfNode from '@tensorflow/tfjs-node-gpu';
-/// #else
-import tfVanilla from '@tensorflow/tfjs';
-/// #endif
+import Model from '@common/model';
+
+import * as tf from './tensorflow';
+import { args } from './args';
+import beginTraining from './train';
+
+// configure the model prior to training it.
+Model.configure(
+    tf,                     // pass tfjs exports
+    args['learning-rate'],  // pass learning rate if given
+    args['batch-size'],     // pass batch size if given
+    args['seed'],           // pass seed for random if given
+    args['channels'],       // pass number of output channels if given
+);
+
+// in case model has some defaults in place, update
+// the arguments accordingly.
+args['learning-rate'] = Model.LEARNING_RATE;
+args['batch-size'] = Model.BATCH_SIZE;
+args['seed'] = Model.RANDOM_SEED;
+args['channels'] = Model.CHANNELS;
+
+// print the arguments to the user.
+console.log(`\n\tArguments during training:\n${JSON.stringify(args, undefined, 4)}`);
 
 /**
- * @note
- * We declare both variables here before initializing `tf`
- * down bellow to make typescript ignore the ReferenceError
- * upon binary compilation.
+ * Wait for input from the user to confirm the beginning of training.
  */
-declare global {
-    const tfNode;
-    const tfVanilla;
-}
-
-/**
- * @note
- * Here tensorflow version is determined by the building
- * procedure.
- * 
- * @see `.\gulpfile.js` and `npm start`
- * 
- * @note try-catch used to ignore ReferenceError at runtime.
- */
-let tf: typeof tfVanilla; try { tf = tfNode; } catch { tf = tfVanilla; }
-
-import { argv, args } from './args';
-
-import test from '@common/model';
-
-test(tf.scalar(1));
-
-console.log({ argv, args });
-
-setTimeout(() => {
-    console.log({ argv, args });
-}, 3000);
+console.log('\n\nPress enter to begin training...');
+new Promise(resolve => process.stdin.once('data', resolve)).then(() => {
+    beginTraining().then(() => process.exit(0));
+});

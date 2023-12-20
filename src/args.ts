@@ -15,17 +15,19 @@ const pargv = minimist(process.argv.slice(2));
  * type. @see {@link StringToTypeMap} and {@link OptionsType}
  */
 const options = {
-    'h': ['h', 'help', 'boolean']          as const,
-    'g': ['g', 'gpu', 'boolean']           as const,
-    'e': ['e', 'epochs', 'number']         as const,
-    's': ['s', 'batch-size', 'number']     as const,
-    'l': ['l', 'learning-rate', 'number']  as const,
-    'v': ['v', 'verbose', 'boolean']       as const,
-    'b': ['b', 'tensorboard', 'boolean']   as const,
-    'p': ['p', 'preview', 'boolean']       as const,
-    'c': ['c', 'checkpoints', 'boolean']   as const,
-    'r': ['r', 'recover', 'boolean']       as const,
-};
+    'h': [ 'h', 'help',          'boolean' ],
+    'd': [ 'd', 'dataset',       'string'  ],
+    'q': [ 'q', 'dataset-size',  'number'  ],
+    'i': [ 'i', 'inputs',        'string'  ],
+    'n': [ 'n', 'channels',      'number'  ],
+    'e': [ 'e', 'epochs',        'number'  ],
+    's': [ 's', 'batch-size',    'number'  ],
+    'r': [ 'r', 'seed',          'number'  ],
+    'l': [ 'l', 'learning-rate', 'number'  ],
+    'b': [ 'b', 'tensorboard',   'string'  ],
+    'p': [ 'p', 'preview',       'string'  ],
+    'c': [ 'c', 'checkpoint',    'string'  ],
+} as const;
 
 type StringToTypeMap = {
     'number': number;
@@ -52,40 +54,48 @@ const parsed = {} as {
 const a = (s :OptionsShort) => pargv[options[s][0]] || pargv[options[s][1]];
 const b = (s?:OptionsAny) => !('false'==(''+s).toLowerCase()); 
 const n = (s?:OptionsAny) => Number(s); 
+const s = (s?:OptionsAny) => (''+s).toLowerCase()=='true'?undefined:''+s; 
 
-if(a('h')) parsed['help']          = b(a('h'))  ?? true;
-if(a('g')) parsed['gpu']           = b(a('g'))  ?? true;
-if(a('e')) parsed['epochs']        = n(a('e'))  ?? Infinity;
-if(a('s')) parsed['batch-size']    = n(a('s'))  ?? 32;
-if(a('l')) parsed['learning-rate'] = n(a('l'))  ?? 1e-4;
-if(a('v')) parsed['verbose']       = b(a('v'))  ?? true;
-if(a('b')) parsed['tensorboard']   = b(a('b'))  ?? true;
-if(a('p')) parsed['preview']       = b(a('p'))  ?? true;
-if(a('c')) parsed['checkpoints']   = b(a('c'))  ?? true;
-if(a('r')) parsed['recover']       = b(a('r'))  ?? true;
+/**
+[define arguments]      [if passed]  [if set]   [if not set]  [if not passed]
+*****************************************************************************/
+parsed['help']          = a('h') ?   b(a('h'))  ?? true       : false;
+parsed['dataset']       = a('d') ?   s(a('d'))  ?? undefined  : undefined;
+parsed['inputs']        = a('i') ?   s(a('i'))  ?? undefined  : undefined;
+parsed['epochs']        = a('e') ?   n(a('e'))  ?? Infinity   : Infinity;
+parsed['dataset-size']  = a('q') ?   n(a('q'))  ?? undefined  : undefined; /* defined in @bin/data.ts */
+parsed['channels']      = a('n') ?   n(a('n'))  ?? undefined  : undefined; /* defined in @common/model.ts */
+parsed['seed']          = a('r') ?   n(a('r'))  ?? undefined  : undefined; /* defined in @common/model.ts */
+parsed['batch-size']    = a('s') ?   n(a('s'))  ?? undefined  : undefined; /* defined in @common/model.ts */
+parsed['learning-rate'] = a('l') ?   n(a('l'))  ?? undefined  : undefined; /* defined in @common/model.ts */
+parsed['tensorboard']   = a('b') ?   s(a('b'))  ?? undefined  : undefined;
+parsed['preview']       = a('p') ?   s(a('p'))  ?? undefined  : undefined;
+parsed['checkpoint']    = a('c') ?   s(a('c'))  ?? './saved'  : './saved';
 
 /**
  * All in one function to print the help message to stdout.
  */
 function printHelpMessage() {
-    console.log('\n@AiMR Model Training (ACGAN)');
+    console.log('\n@AiMR Model Training');
     console.log('\nUsage: <path/to/executable> <options>');
     console.log('\nOptions:');
     console.log('\t-h, --help               Print this help message.');
-    console.log('\t-g, --gpu                Use CUDA enabled GPU. (Default: true)');
+    console.log('\t-d, --dataset            Reads (creates if non-existent) dataset file.');
+    console.log('\t-i, --inputs             Specify the path to the inputs files used to generate the dataset.');
     console.log('\t-e, --epochs             Number of epochs. (Default: Infinity, until SIGINT)');
+    console.log('\t-q, --dataset-size       Size of dataset used (or generated). (Default: 1000)');
+    console.log('\t-n, --channels           Number of image channels. Default is 3 for RGB.');
+    console.log('\t-r, --seed               Optional seed number used during random generation.');
     console.log('\t-s, --batch-size         Batch size to use each epoch. (Default: 32)');
-    console.log('\t-l, --learning-rate      Set the learning rate. (Default: 1e-4)');
-    console.log('\t-v, --verbose            Increase verbosity level. (Default: not verbose)');
-    console.log('\t-b, --tensorboard        Update tensorboard graphs while training. (Default: true)');
-    console.log('\t-p, --preview            Generate preview sampled image. (Default: true)');
-    console.log('\t-c, --checkpoints        Generate checkpoints. (Default: true)');
-    console.log('\t-r, --recover            Recover available checkpoints. (Default: true)');
+    console.log('\t-l, --learning-rate      Set the learning rate. (Default: 2e-4)');
+    console.log('\t-b, --tensorboard        Update tensorboard graphs while training at the given path.');
+    console.log('\t-p, --preview            Generate preview sampled png image at the given path.');
+    console.log('\t-c, --checkpoint         Specify checkpoint path to use.');
     console.log('\nExamples:');
-    console.log('\t# Simple test without checkpoints and GPU acceleration.');
-    console.log('\t$ <path/to/executable> -gbprc=false\n');
-    console.log('\t# Verbose test with all the bells and whistles for a few epochs.');
-    console.log('\t$ <path/to/executable> -g -e 100 -s 10\n');
+    console.log('\t# Simple test without checkpoint and GPU acceleration.');
+    console.log('\t$ <path/to/executable> -pc=false -b=./tensorboard\n');
+    console.log('\t# All the bells and whistles for a few epochs.');
+    console.log('\t$ <path/to/executable> -e 100 -s 10\n');
     process.exit();
 }
 

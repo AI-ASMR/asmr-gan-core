@@ -41,12 +41,12 @@ export default class AiMR_GAN {
 
     /**
      * This function will generate chunk(s) of images
-     * @param {number} [count=1] Integer >= 1. How many chunks to generate.
+     * @param {number} [chunks=1] Integer >= 1. How many chunks to generate.
      */
-    static generateChunks(count = 1) {
+    static generateAudio(chunks = 1) {
         /**
          * @todo: 
          */
-        count;
+        chunks;
     }
 }

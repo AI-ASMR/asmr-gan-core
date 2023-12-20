@@ -9,16 +9,22 @@
 [![Docker](https://badgen.net/badge/icon/docker?icon=docker&label)](https://hub.docker.com/repository/docker/stiliyankushev/aimr-asmr-gan/general)
  
 #### Table of Contents
-1. [What is this?](#introduction)
-2. [Getting started.](#getting-started)
-3. [Build from source.](#build-from-source)
-4. [Repo's file structure.](#file-structure)
-5. [Versioning and automation.](#versioning)
-6. [Arch linux NVIDIA Container Toolkit.](#arch-nvidia-container)
+-  [What is this?](#introduction)
+-  [Model architecture.](#model)
+-  [Getting started.](#getting-started)
+-  [Build from source.](#build-from-source)
+-  [Repo's file structure.](#file-structure)
+-  [Versioning and automation.](#versioning)
+-  [Arch linux NVIDIA Container Toolkit.](#arch-nvidia-container)
+-  [Windows Support.](#windows)
 
 ### What is this? <a id="introduction"></a>
 
 This is an all-in-one repository that holds the source code for both the training of the AI GAN model, along with the library that can be used in any javascript context to load a pre-trained model and use it interactively.
+
+### Model architecture. <a id="model"></a>
+
+<img src="https://i.imgur.com/F0XZWjJ.png">
 
 ### Getting started. <a id="getting-started"></a>
 
@@ -161,3 +167,7 @@ At this point docker should be configured. Test like so:
 sudo docker run --gpus all ubuntu nvidia-smi
 ```
 If `nvidia-smi` works, than everything works as expected.
+
+### Windows Support. <a id="windows"></a>
+
+The easiest way to run this is to use the docker container in WSL(2) and enable NVIDIA CUDA following this [guide](https://learn.microsoft.com/en-us/windows/ai/directml/gpu-cuda-in-wsl).
