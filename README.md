@@ -9,16 +9,97 @@
 [![Docker](https://badgen.net/badge/icon/docker?icon=docker&label)](https://hub.docker.com/repository/docker/stiliyankushev/aimr-asmr-gan/general)
  
 #### Table of Contents
-1. [What is this?](#introduction)
-2. [Getting started.](#getting-started)
-3. [Build from source.](#build-from-source)
-4. [Repo's file structure.](#file-structure)
-5. [Versioning and automation.](#versioning)
-6. [Arch linux NVIDIA Container Toolkit.](#arch-nvidia-container)
+-  [What is this?](#introduction)
+-  [Model architecture.](#model)
+-  [Getting started.](#getting-started)
+-  [Build from source.](#build-from-source)
+-  [Repo's file structure.](#file-structure)
+-  [Versioning and automation.](#versioning)
+-  [Arch linux NVIDIA Container Toolkit.](#arch-nvidia-container)
+-  [Windows Support.](#windows)
 
 ### What is this? <a id="introduction"></a>
 
 This is an all-in-one repository that holds the source code for both the training of the AI GAN model, along with the library that can be used in any javascript context to load a pre-trained model and use it interactively.
+
+### Model architecture. <a id="model"></a>
+
+<table style="width: 100%;">
+<tr>
+<td>
+Discriminator's sequential model.
+</td>
+<td>
+Generator's sequential model.
+</td>
+</tr>
+<tr>
+<td style="width: 50%; vertical-align: top;">
+<div style="display: flex; flex-direction: column; height: 100%;">
+<div style="flex: 1;">
+<pre style="overflow: auto; max-height: 500px;">
+          
+```mermaid
+graph LR
+
+classDef defaultClass fill:#f9f,stroke:#333,stroke-width:1px;
+classDef layerClass fill:#bfb,stroke:#333,stroke-width:1px;
+
+subgraph  
+    DisStart[Discriminator Model]:::defaultClass --> |Input: Image 64 x 64 x Channels| DisConv2DLayer1[Conv2D + LeakyReLU]:::layerClass
+    DisConv2DLayer1 --> |Conv2D to 32 x 32 x 128| DisConv2DLayer2[Conv2D + LeakyReLU]:::layerClass
+    DisConv2DLayer2 --> |Conv2D to 32 x 32 x 128| DisAntiCheckerboardLayer[Anti-Checkerboard Layer + LeakyReLU]:::layerClass
+    DisAntiCheckerboardLayer --> |Conv2D to 16 x 16 x 256| DisConv2DLayer3[Conv2D + LeakyReLU]:::layerClass
+    DisConv2DLayer3 --> |Conv2D to 8 x 8 x 512| DisConv2DLayer4[Conv2D + LeakyReLU]:::layerClass
+    DisConv2DLayer4 --> |Conv2D to 4 x 4 x 1024| DisConv2DLayer5[Conv2D + LeakyReLU]:::layerClass
+    DisConv2DLayer5 --> |Flatten| DisFlattenLayer[Flatten Layer]:::layerClass
+    DisFlattenLayer --> |Dense to 1 Sigmoid| DisDenseLayer[Dense Layer + Sigmoid]:::layerClass
+    DisDenseLayer --> |Output: Realness Score| DisEnd[Realness Score]:::defaultClass
+end
+
+%% Styling
+classDef classA fill:#f96,stroke:#333,stroke-width:4px;
+classDef classB fill:#9f6,stroke:#333,stroke-width:2px;
+
+```
+
+</pre>
+</div>
+</div>
+</td>
+<td style="width: 50%; vertical-align: top;">
+<div style="display: flex; flex-direction: column; height: 100%;">
+<div style="flex: 1;">
+<pre style="overflow: auto; max-height: 500px;">
+          
+```mermaid
+graph LR
+
+classDef defaultClass fill:#f9f,stroke:#333,stroke-width:1px;
+classDef layerClass fill:#bfb,stroke:#333,stroke-width:1px;
+
+subgraph  
+    GenStart[Generator Model]:::defaultClass --> |Input: Latent Space Noise| GenDenseLayer[Dense Layer]:::layerClass
+    GenDenseLayer --> |Reshape to 4 x 4 x 1024| GenReshapeLayer[Reshape Layer]:::layerClass
+    GenReshapeLayer --> |Conv2DTranspose to 8 x 8 x 512| GenConv2DTrans1[Conv2D Transpose + ReLU]:::layerClass
+    GenConv2DTrans1 --> |Conv2DTranspose to 16 x 16 x 256| GenConv2DTrans2[Conv2D Transpose + ReLU]:::layerClass
+    GenConv2DTrans2 --> |Conv2DTranspose to 32 x 32 x 128| GenConv2DTrans3[Conv2D Transpose + ReLU]:::layerClass
+    GenConv2DTrans3 --> |Conv2DTranspose to 32 x 32 x 128| GenAntiCheckerboard[Anti-Checkerboard Layer + ReLU]:::layerClass
+    GenAntiCheckerboard --> |Conv2DTranspose to 64 x 64 x Channels| GenFinalLayer[Final Conv2D Transpose + Tanh]:::layerClass
+    GenFinalLayer --> |Output: Image 64 x 64 x Channels| GenEnd[Generated Image]:::defaultClass
+end
+
+%% Styling
+classDef classA fill:#f96,stroke:#333,stroke-width:4px;
+classDef classB fill:#9f6,stroke:#333,stroke-width:2px;
+```
+
+</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
 
 ### Getting started. <a id="getting-started"></a>
 
@@ -161,3 +242,7 @@ At this point docker should be configured. Test like so:
 sudo docker run --gpus all ubuntu nvidia-smi
 ```
 If `nvidia-smi` works, than everything works as expected.
+
+### Windows Support. <a id="windows"></a>
+
+The easiest way to run this is to use the docker container in WSL(2) and enable NVIDIA CUDA following this [guide](https://learn.microsoft.com/en-us/windows/ai/directml/gpu-cuda-in-wsl).
