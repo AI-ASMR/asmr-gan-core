@@ -15,7 +15,9 @@
     "@types/node": "^20.10.4",
     "gulp": "^4.0.2",
     "gulp-replace": "^1.1.4",
+    "jpeg-js": "^0.4.4",
     "pkg": "^5.8.1",
+    "pngjs": "^7.0.0",
     "tsx": "^4.6.2"
   },
   "dependencies": {
