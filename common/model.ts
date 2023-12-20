@@ -28,6 +28,7 @@ export default class Model {
     static LATENT_SIZE    = 100;
     static RANDOM_SEED    = undefined;
     static DREG_SCALE     = 0.0001;
+    static L_RELU_RATE    = 0.2;
 
     static tf: typeof tf;
 
@@ -152,6 +153,21 @@ export default class Model {
         }));
         model.add(this.tf.layers.reLU());
 
+        /** 
+         * additional layer to circumvent checkerboard effect 
+         * @see https://distill.pub/2016/deconv-checkerboard/
+         */
+        model.add(this.tf.layers.conv2dTranspose({
+            filters: 128,
+            strides: 1, // keep dimensions
+            kernelSize: 5,
+            padding: 'same',
+            kernelInitializer: this.weightsInitializer,
+            kernelRegularizer: this.kernelRegularizer,
+            biasInitializer: this.biasInitializer,
+        }));
+        model.add(this.tf.layers.reLU());
+
         /* reshape to [64, 64, channels] */
         model.add(this.tf.layers.conv2dTranspose({
             filters: this.CHANNELS,
@@ -194,7 +210,22 @@ export default class Model {
             kernelRegularizer: this.kernelRegularizer,
             biasInitializer: this.biasInitializer,
         }));
-        model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
+        model.add(this.tf.layers.leakyReLU({ alpha: this.L_RELU_RATE }));
+
+        /**
+         * additional layer to keep symmetry with the generator
+         * due to the anti-checkerboard effect layer.
+         */
+        model.add(this.tf.layers.conv2d({
+            filters: 128,
+            strides: 1,
+            kernelSize: 5,
+            padding: 'same',
+            kernelInitializer: this.weightsInitializer,
+            kernelRegularizer: this.kernelRegularizer,
+            biasInitializer: this.biasInitializer,
+        }));
+        model.add(this.tf.layers.leakyReLU({ alpha: this.L_RELU_RATE }));
     
         /* reshape to [16, 16, 256] */
         model.add(this.tf.layers.conv2d({
@@ -206,7 +237,7 @@ export default class Model {
             kernelRegularizer: this.kernelRegularizer,
             biasInitializer: this.biasInitializer,
         }));
-        model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
+        model.add(this.tf.layers.leakyReLU({ alpha: this.L_RELU_RATE }));
     
         /* reshape to [8, 8, 512] */
         model.add(this.tf.layers.conv2d({
@@ -218,7 +249,7 @@ export default class Model {
             kernelRegularizer: this.kernelRegularizer,
             biasInitializer: this.biasInitializer,
         }));
-        model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
+        model.add(this.tf.layers.leakyReLU({ alpha: this.L_RELU_RATE }));
     
         /* reshape to [4, 4, 1024] */
         model.add(this.tf.layers.conv2d({
@@ -230,7 +261,7 @@ export default class Model {
             kernelRegularizer: this.kernelRegularizer,
             biasInitializer: this.biasInitializer,
         }));
-        model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
+        model.add(this.tf.layers.leakyReLU({ alpha: this.L_RELU_RATE }));
     
         // Flatten the output and use a dense layer for classification
         model.add(this.tf.layers.flatten());
@@ -355,7 +386,7 @@ export default class Model {
             // create random noise for generator's input
             const zVectors = this.tf.randomUniform(
                 [REAL_BATCH_SIZE, this.LATENT_SIZE], -1, 1, undefined, this.RANDOM_SEED);
-        
+
             // create many 'fake' images
             const generatedImages = generator.predict(zVectors, { 
                 batchSize: REAL_BATCH_SIZE 
