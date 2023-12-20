@@ -115,7 +115,6 @@ export default class Model {
         model.add(this.tf.layers.reshape({ 
             targetShape: [4, 4, 1024] 
         }));
-        // model.add(this.tf.layers.batchNormalization());
 
         /* reshape to [8, 8, 512] */
         model.add(this.tf.layers.conv2dTranspose({
@@ -127,7 +126,6 @@ export default class Model {
             kernelRegularizer: this.kernelRegularizer,
             biasInitializer: this.biasInitializer,
         }));
-        // model.add(this.tf.layers.batchNormalization());
         model.add(this.tf.layers.reLU());
 
         /* reshape to [16, 16, 256] */
@@ -140,7 +138,6 @@ export default class Model {
             kernelRegularizer: this.kernelRegularizer,
             biasInitializer: this.biasInitializer,
         }));
-        // model.add(this.tf.layers.batchNormalization());
         model.add(this.tf.layers.reLU());
 
         /* reshape to [32, 32, 128] */
@@ -153,7 +150,6 @@ export default class Model {
             kernelRegularizer: this.kernelRegularizer,
             biasInitializer: this.biasInitializer,
         }));
-        // model.add(this.tf.layers.batchNormalization());
         model.add(this.tf.layers.reLU());
 
         /* reshape to [64, 64, channels] */
@@ -210,7 +206,6 @@ export default class Model {
             kernelRegularizer: this.kernelRegularizer,
             biasInitializer: this.biasInitializer,
         }));
-        // model.add(this.tf.layers.batchNormalization());
         model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
     
         /* reshape to [8, 8, 512] */
@@ -223,7 +218,6 @@ export default class Model {
             kernelRegularizer: this.kernelRegularizer,
             biasInitializer: this.biasInitializer,
         }));
-        // model.add(this.tf.layers.batchNormalization());
         model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
     
         /* reshape to [4, 4, 1024] */
@@ -236,7 +230,6 @@ export default class Model {
             kernelRegularizer: this.kernelRegularizer,
             biasInitializer: this.biasInitializer,
         }));
-        // model.add(this.tf.layers.batchNormalization());
         model.add(this.tf.layers.leakyReLU({ alpha: 0.2 }));
     
         // Flatten the output and use a dense layer for classification
