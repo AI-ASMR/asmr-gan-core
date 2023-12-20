@@ -408,4 +408,23 @@ export default class Model {
         this.tf.dispose([x, y]);
         return loss as number;
     }
+
+    /**
+     * Saves the generator's state.
+     * 
+     * @param generator The generator to save.
+     * @param path Path to model.
+     */
+    static async serialize(generator: tf.LayersModel, path: string | tf.io.IOHandler) {
+        await generator.save(path);
+    }
+
+    /**
+     * Loads the generator's state from disk or url.
+     * 
+     * @param path Path to model.
+     */
+    static async deserialize(path: string | tf.io.IOHandler) {
+        return this.tf.loadLayersModel(path);
+    }
 }

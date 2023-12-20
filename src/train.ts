@@ -81,6 +81,9 @@ export default async function beginTraining() {
      * Main training loop.
      */
     for(let epoch = 0; epoch < args.epochs; epoch++) {
+        // save the generator's progress on every epoch
+        await Model.serialize(generator, `file://${args.checkpoint}`);
+
         for(const [took, count, realBatch] of datasetIterator()) {
             const dLoss = await Model.trainDiscriminator(generator, discriminator, realBatch);
             const gLoss = await Model.trainGenerator(combined);
