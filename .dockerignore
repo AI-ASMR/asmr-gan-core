@@ -1,6 +1,0 @@
-node_modules
-tensorboard/**
-Dockerfile
-.pre
-.out
-docs
