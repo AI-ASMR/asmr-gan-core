@@ -1,11 +1,9 @@
 {
   "name": "@aimr/asmr-gan-lib",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "",
   "main": ".out/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "author": "StiliyanKushev",
   "license": "ISC"
 }
