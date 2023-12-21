@@ -2,3 +2,4 @@ node_modules
 .pre
 .out
 tensorboard/**
+docs

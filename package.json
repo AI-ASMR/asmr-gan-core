@@ -4,11 +4,10 @@
     "description": "",
     "scripts": {
         "preinstall": "node ./scripts.js --prepare.lib --prepare.bin",
+        "docs": "node ./scripts.js --docs",
         "build.lib": "node ./scripts.js --build.lib",
         "publish.lib": "node ./scripts.js --publish.lib",
         "build.bin": "node ./scripts.js --build.bin",
-        "docs.lib": "node ./scripts.js --docs.lib",
-        "docs.bin": "node ./scripts.js --docs.bin",
         "test.lib": "node ./scripts.js --test.lib",
         "test.bin": "node ./scripts.js --test.bin",
         "lint.all": "node ./scripts.js --lint.all",
@@ -26,6 +25,7 @@
         "@typescript-eslint/eslint-plugin": "^6.13.2",
         "@typescript-eslint/parser": "^6.13.2",
         "eslint": "^8.55.0",
+        "typedoc": "^0.25.4",
         "typescript": "^5.3.3"
     },
     "engines": {

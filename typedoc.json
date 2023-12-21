@@ -1,0 +1,6 @@
+{
+    "entryPoints": ["./lib", "./src"],
+    "name": "AiMR's Model Training",
+    "entryPointStrategy": "packages",
+    "includeVersion": false,
+}

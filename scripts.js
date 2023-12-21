@@ -378,12 +378,13 @@ registerCommand('run.bin', () => {
     exec(`npx tsx ./.pre/index.ts --tsconfig ./dev.tsconfig.json ${args}`, { cwd: './src' });
 }, true /* Don't print to stdout as we're running the binary. */);
 
-registerCommand('docs.lib', () => {
-    console.log('todo');
-});
+registerCommand('docs', () => {
+    console.log('Building docs...');
+    exec('npx typedoc');
 
-registerCommand('docs.bin', () => {
-    console.log('todo');
+    // copy over markdown assets
+    for(const file of fs.readdirSync('./assets'))
+        fs.copyFileSync(`./assets/${file}`, `./docs/assets/${file}`);
 });
 
 registerCommand('test.lib', () => {
