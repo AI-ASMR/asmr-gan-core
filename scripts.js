@@ -404,7 +404,10 @@ registerCommand('publish.docs', () => {
     exec('git checkout docs');
     exec('git rm -rf ./docs');
     exec('git commit -m "docs: cleanup"');
-    exec('git push');
+    if(process.env.GITHUB_TOKEN)
+        exec(`git push https://${process.env.GITHUB_TOKEN}@github.com/AI-ASMR/asmr-gan-core.git docs`);
+    else
+        exec('git push origin docs');
     exec('git checkout main');
 
     // build new docs
@@ -418,14 +421,10 @@ registerCommand('publish.docs', () => {
     exec('git add ./docs -f');
     exec('git commit -m "docs: update"');
 
-    // ci/cd
-    if(process.env.GITHUB_TOKEN) {
+    if(process.env.GITHUB_TOKEN)
         exec(`git push https://${process.env.GITHUB_TOKEN}@github.com/AI-ASMR/asmr-gan-core.git docs`);
-    }
-    // manual/local
-    else {
+    else
         exec('git push origin docs');
-    }
 });
 
 registerCommand('test.lib', () => {
