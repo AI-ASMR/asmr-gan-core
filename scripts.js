@@ -400,6 +400,7 @@ registerCommand('build.docs', () => {
  */
 registerCommand('publish.docs', () => {
     // clean the docs branch
+    exec('git fetch');
     exec('git checkout docs');
     exec('git rm -rf ./docs');
     exec('git commit -m "docs: cleanup"');
