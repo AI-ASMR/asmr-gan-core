@@ -1,3 +1,6 @@
+/**
+ * @todo: include example usages and basic description here.
+ */
 export default class AiMR_GAN {
     static loaded = false;
     static cached = false;
