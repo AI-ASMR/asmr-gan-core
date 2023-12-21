@@ -1,6 +1,6 @@
 {
     "entryPoints": ["./lib", "./src"],
-    "name": "AiMR's Model Training",
+    "name": "aimr-gan-docs",
     "entryPointStrategy": "packages",
     "includeVersion": false,
 }

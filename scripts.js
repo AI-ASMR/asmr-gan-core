@@ -401,9 +401,12 @@ registerCommand('build.docs', () => {
 registerCommand('publish.docs', () => {
     // clean the docs branch
     exec('git checkout docs');
-    exec('git rm -f ./docs');
+    exec('git rm -rf ./docs');
+    exec('git commit -m "docs: cleanup"');
+    exec('git push');
     exec('git checkout main');
 
+    // build new docs
     executeCommand('build.docs');
 
     // copy over markdown assets
