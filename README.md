@@ -24,7 +24,7 @@ This is an all-in-one repository that holds the source code for both the trainin
 
 ### Model architecture. <a id="model"></a>
 
-<img src="https://i.imgur.com/F0XZWjJ.png">
+<img src="./assets/model.png">
 
 ### Getting started. <a id="getting-started"></a>
 

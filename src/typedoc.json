@@ -1,0 +1,6 @@
+{
+    "extends": ["../typedoc.base.json"],
+    "entryPoints": ["./*.ts"],
+    "excludeNotDocumented": true,
+    "exclude": ["./index.ts"]
+}

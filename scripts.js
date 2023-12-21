@@ -378,12 +378,50 @@ registerCommand('run.bin', () => {
     exec(`npx tsx ./.pre/index.ts --tsconfig ./dev.tsconfig.json ${args}`, { cwd: './src' });
 }, true /* Don't print to stdout as we're running the binary. */);
 
-registerCommand('docs.lib', () => {
-    console.log('todo');
+/**
+ * @summary
+ * Build docs using typedoc via monorepo packages.
+ * 
+ * @example `npm run build.docs`
+ */
+registerCommand('build.docs', () => {
+    console.log('Building docs...');
+    exec('npx typedoc');
 });
 
-registerCommand('docs.bin', () => {
-    console.log('todo');
+/**
+ * @summary
+ * All in one command to build and publish the docs to
+ * the `docs` branch which is where github pages point to.
+ * 
+ * @note CI/CD runs this on every version bump. @see registerCommand('inc.ver')
+ * 
+ * @see '.github\workflows\publish-docs.yml'
+ */
+registerCommand('publish.docs', () => {
+    // clean the docs branch
+    exec('git checkout docs');
+    exec('git rm -f ./docs');
+    exec('git checkout main');
+
+    executeCommand('build.docs');
+
+    // copy over markdown assets
+    for(const file of fs.readdirSync('./assets'))
+        fs.copyFileSync(`./assets/${file}`, `./docs/assets/${file}`);
+
+    exec('git checkout docs');
+    exec('git add ./docs -f');
+    exec('git commit -m "docs: update"');
+
+    // ci/cd
+    if(process.env.GITHUB_TOKEN) {
+        exec(`git push https://${process.env.GITHUB_TOKEN}@github.com/AI-ASMR/asmr-gan-core.git docs`);
+    }
+    // manual/local
+    else {
+        exec('git push origin docs');
+    }
 });
 
 registerCommand('test.lib', () => {
