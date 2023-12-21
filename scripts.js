@@ -387,8 +387,7 @@ registerCommand('docs', () => {
         fs.copyFileSync(`./assets/${file}`, `./docs/assets/${file}`);
 
     exec('git checkout docs');
-    exec('git rm -rf .');
-    exec('git add ./docs');
+    exec('git add ./docs -f');
     exec('git commit -m "docs: update"');
     exec('git push origin docs');
 });
