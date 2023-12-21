@@ -118,6 +118,7 @@ CI/CD implementation can be found here:
 -   [publish-git-version.yml](https://github.com/AI-ASMR/asmr-gan-core/blob/main/.github/workflows/publish-git-version.yml) - called on (above) version bump.
 -   [publish-npm-package.yml](https://github.com/AI-ASMR/asmr-gan-core/blob/main/.github/workflows/publish-npm-package.yml) - called on (above) version bump.
 -   [publish-docker-tag.yml](https://github.com/AI-ASMR/asmr-gan-core/blob/main/.github/workflows/publish-docker-tag.yml) - called on (above) version bump.
+-   [publish-docs.yml](https://github.com/AI-ASMR/asmr-gan-core/blob/main/.github/workflows/publish-docs.yml) - called on (above) version bump.
 
 The repository hosts a minimal, scripted and cross-platform build tool used by all github actions, as well as users (via npm-scripts.)
 
