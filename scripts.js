@@ -385,6 +385,12 @@ registerCommand('docs', () => {
     // copy over markdown assets
     for(const file of fs.readdirSync('./assets'))
         fs.copyFileSync(`./assets/${file}`, `./docs/assets/${file}`);
+
+    exec('git checkout docs');
+    exec('git rm -rf .');
+    exec('git add ./docs');
+    exec('git commit -m "docs: update"');
+    exec('git push origin docs');
 });
 
 registerCommand('test.lib', () => {
