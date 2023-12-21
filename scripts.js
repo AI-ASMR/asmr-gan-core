@@ -51,7 +51,7 @@ registerCommand('inc.ver', (manualVersion = undefined) => {
         process.exit(1);
     }
 
-    if([curVersion, newVersion].sort().pop() == curVersion) {
+    if(Number(curVersion.replaceAll('.', '')) > Number(newVersion.replaceAll('.', ''))) {
         console.log('New version is lower than current version.');
         console.log('current version', curVersion);
         console.log('new version', newVersion);

@@ -45,7 +45,7 @@ export default class AiMR_GAN {
      */
     static generateAudio(chunks = 1) {
         /**
-         * @todo: 
+         * @todo
          */
         chunks;
     }
