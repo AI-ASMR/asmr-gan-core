@@ -427,6 +427,36 @@ registerCommand('publish.docs', () => {
         exec('git push origin docs');
 });
 
+/**
+ * @summary
+ * Handles the upload of any locally trained data and the removal
+ * of old one from git releases.
+ * 
+ * @note
+ * Should be called manually, after training.
+ */
+registerCommand('publish.model', () => {
+    console.log('publishing model...');
+
+    // delete old if exists
+    exec('gh release delete trained-model -y', {}, true);
+
+    /**
+     * @returns A list of all files related to trained model.
+     */
+    const releaseFiles = () => {
+        return fs.readdirSync('./saved')
+            .map(file => `./saved/${file}`)
+            .join(' ') + ' ';
+    };
+
+    exec(
+        'gh release create trained-model ' + 
+        releaseFiles() +
+        '--title "Latest trained model files" ' + 
+        '--latest=false --target=main --notes ""');
+});
+
 registerCommand('test.lib', () => {
     console.log('todo');
 });
