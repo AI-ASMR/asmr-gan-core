@@ -34,8 +34,8 @@ export default class AiMR_GAN {
         }
         /**
          * @todo: cache in some way, depending on the execution context.
-         * @see https://github.com/localForage/localForage
-         * @see https://github.com/lmaccherone/node-localstorage
+         * @todo: Probably use tfjs save model feature and the serialization
+         * provided by common Model.
          */
     }
 
