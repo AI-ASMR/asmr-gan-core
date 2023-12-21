@@ -432,8 +432,9 @@ registerCommand('publish.docs', () => {
  * Handles the upload of any locally trained data and the removal
  * of old one from git releases.
  * 
- * @note
- * Should be called manually, after training.
+ * @note Requires `gh` to be installed. @see https://man.archlinux.org/man/gh
+ * @note Requires `gh auth login`.
+ * @note Should be called manually, after training.
  */
 registerCommand('publish.model', () => {
     console.log('publishing model...');
