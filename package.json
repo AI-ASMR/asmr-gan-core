@@ -4,7 +4,8 @@
     "description": "",
     "scripts": {
         "preinstall": "node ./scripts.js --prepare.lib --prepare.bin",
-        "docs": "node ./scripts.js --docs",
+        "build.docs": "node ./scripts.js --build.docs",
+        "publish.docs": "node ./scripts.js --publish.docs",
         "build.lib": "node ./scripts.js --build.lib",
         "publish.lib": "node ./scripts.js --publish.lib",
         "build.bin": "node ./scripts.js --build.bin",
