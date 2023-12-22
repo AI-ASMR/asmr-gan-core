@@ -22,7 +22,8 @@
 
 This is an all-in-one repository that holds the source code for both the training of the AI GAN model, along with the library that can be used in any javascript context to load a pre-trained model and use it interactively.
 
-Documentation can be found at [ai-asmr.github.io/asmr-gan-core](https://ai-asmr.github.io/asmr-gan-core/).
+Documentation can be found at [ai-asmr.github.io/asmr-gan-core](https://ai-asmr.github.io/asmr-gan-core/).<br/>
+Latest trained model files can be found [here](https://github.com/AI-ASMR/asmr-gan-core/releases/tag/trained-model).
 
 ### Model architecture. <a id="model"></a>
 
