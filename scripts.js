@@ -182,6 +182,7 @@ registerCommand('clean.root.bin', () => {
 registerCommand('clean.lib', () => {
     console.log('Cleaning lib folder...');
     rm('./lib/.out');
+    rm('./lib/.cdn');
     rm('./lib/README.md');
     rm('./lib/assets');
 });
@@ -240,6 +241,15 @@ registerCommand('prepare.bin', () => {
 
 /**
  * @summary
+ * Takes care of bundling the library so it can be 
+ * published to a cdn in addition to npm.
+ */
+registerCommand('bundle.lib', () => {
+    exec('npx rollup -c', { cwd: './lib' });
+});
+
+/**
+ * @summary
  * Builds the library of the module and packs it into a .tgz, 
  * storing it into ./bin right afterwards, and cleans after itself.
  * 
@@ -249,6 +259,7 @@ registerCommand('build.lib', () => {
     console.log('Building the packed library...');
     exec('npx tsc -p ./tsconfig.json', { cwd: './lib' });
     exec('npx gulp lib.postprocessing.out', { cwd: './lib', stdio: 'pipe' });
+    executeCommand('bundle.lib');
 
     /**
      * @note copy the root README.md to the package (used by npm)

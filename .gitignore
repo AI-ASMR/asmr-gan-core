@@ -1,6 +1,7 @@
 node_modules
 .pre
 .out
+.cdn
 tensorboard/**
 docs
 firebase-key.json

@@ -1,6 +1,7 @@
 node_modules
 *
 !.out/**
+!.cdn/**
 !assets/**
 !package.json
 !package-lock.json

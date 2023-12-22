@@ -3,5 +3,6 @@ tensorboard/**
 Dockerfile
 .pre
 .out
+.cdn
 docs
 firebase-key.json
