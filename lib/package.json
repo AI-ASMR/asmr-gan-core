@@ -3,6 +3,7 @@
   "version": "0.0.10",
   "description": "",
   "main": ".out/lib/index.js",
+  "typings": ".out/lib/index.d.ts",
   "scripts": {},
   "author": "StiliyanKushev",
   "license": "ISC"

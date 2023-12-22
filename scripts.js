@@ -180,6 +180,7 @@ registerCommand('clean.lib', () => {
     console.log('Cleaning lib folder...');
     rm('./lib/.out');
     rm('./lib/README.md');
+    rm('./lib/assets');
 });
 
 /**
@@ -250,6 +251,14 @@ registerCommand('build.lib', () => {
      * @note copy the root README.md to the package (used by npm)
      */
     fs.copyFileSync('./README.md', './lib/README.md');
+
+    /**
+     * @note copy all of README.md's assets too.
+     */
+    fs.mkdirSync('./lib/assets');
+    for(const file of fs.readdirSync('./assets'))
+        fs.copyFileSync(`./assets/${file}`, `./lib/assets/${file}`);
+
     /**
      * @note dry run to get file name
      * @note stdio: 'pipe' in order for the function to return the stdout.

@@ -1,6 +1,7 @@
 node_modules
 *
-!.out
+!.out/**
+!assets/**
 !package.json
 !package-lock.json
 !README.md
