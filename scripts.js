@@ -51,7 +51,10 @@ registerCommand('inc.ver', (manualVersion = undefined) => {
         process.exit(1);
     }
 
-    if(Number(curVersion.replaceAll('.', '')) > Number(newVersion.replaceAll('.', ''))) {
+    const curVersionNumber = Number(curVersion.split('.')[0]+'.'+curVersion.split('.').slice(1).join(''));
+    const newVersionNumber = Number(newVersion.split('.')[0]+'.'+newVersion.split('.').slice(1).join(''));
+
+    if(curVersionNumber > newVersionNumber) {
         console.log('New version is lower than current version.');
         console.log('current version', curVersion);
         console.log('new version', newVersion);
