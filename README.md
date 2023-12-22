@@ -39,6 +39,23 @@ Or you can install it locally by downloading the latest release.
 ```shell
 npm i aimr-asmr-gan-lib-<version>.tgz
 ```
+
+#### Example usage.
+
+```js
+// or use require
+import AiMR_GAN from "@aimr/asmr-gan-lib";
+
+// import some version of tensorflow in any way you'd like
+import * as tf from "@tensorflow/tfjs";
+
+// load the model and/or cache it for subsequent reloads.
+await AiMR_GAN.load(tf);
+
+// generate some fake Asmr Images
+console.log(await AiMR_GAN.generateChunks(1));
+```
+
 To train your own model take a look at the [release binaries](https://github.com/AI-ASMR/asmr-gan-core/releases/).
 To get a quick rundown on how to use it simply run:
 ```shell

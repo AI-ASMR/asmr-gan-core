@@ -16,7 +16,18 @@ import tf from '@tensorflow/tfjs';
 import Model from '@common/model';
 
 /**
- * @todo: include example usages and basic description here.
+ * @example
+ * // or use require
+ * import AiMR_GAN from "@aimr/asmr-gan-lib";
+ * 
+ * // import some version of tensorflow in any way you'd like
+ * import * as tf from "@tensorflow/tfjs";
+ * 
+ * // load the model and/or cache it for subsequent reloads.
+ * await AiMR_GAN.load(tf);
+ * 
+ * // generate some fake Asmr Images
+ * console.log(await AiMR_GAN.generateChunks(1));
  */
 export default class AiMR_GAN {
     static tf: typeof tf;
@@ -87,7 +98,7 @@ export default class AiMR_GAN {
      * @returns {Uint8Array[]} Array with length of chunks where each element
      * is a Uint8Array of image data.
      */
-    static generateChunks(chunks = 1) {
+    static generateChunks(chunks = 1): Uint8Array[] {
         if(!this.loaded) {
             throw new Error('Cannot use model before loading it.');
         }
