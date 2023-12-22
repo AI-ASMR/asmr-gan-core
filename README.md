@@ -41,6 +41,10 @@ Or you can install it locally by downloading the latest release.
 ```shell
 npm i aimr-asmr-gan-lib-<version>.tgz
 ```
+Or you can import it via cdn like so:
+```html
+<script src="https://cdn.jsdelivr.net/npm/@aimr/asmr-gan-lib/.cdn/bundle.min.js"></script>
+```
 
 #### Example usage.
 
