@@ -4,3 +4,4 @@ Dockerfile
 .pre
 .out
 docs
+firebase-key.json

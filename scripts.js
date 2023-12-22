@@ -244,6 +244,8 @@ registerCommand('prepare.bin', () => {
 registerCommand('build.lib', () => {
     console.log('Building the packed library...');
     exec('npx tsc -p ./tsconfig.json', { cwd: './lib' });
+    exec('npx gulp lib.postprocessing.out', { cwd: './lib', stdio: 'pipe' });
+
     /**
      * @note copy the root README.md to the package (used by npm)
      */
@@ -434,28 +436,64 @@ registerCommand('publish.docs', () => {
  * 
  * @note Requires `gh` to be installed. @see https://man.archlinux.org/man/gh
  * @note Requires `gh auth login`.
+ * @note Requires `firebase` to be installed. @see https://firebase.google.com/docs/cli/
+ * @note Requires `firebase login`.
+ * @note Requires `firebase login`.
  * @note Should be called manually, after training.
+ * 
+ * @example `npm run publish.model -- <path/to/firebase/key.json>`
  */
-registerCommand('publish.model', () => {
+registerCommand('publish.model', async () => {
     console.log('publishing model...');
+
+    const [modelPath, weightsPath] = ['./saved/model.json', './saved/weights.bin'];
+
+    if(!fs.existsSync(modelPath)) {
+        console.log(`${modelPath} not found.`);
+        process.exit(1);
+    }
+    if(!fs.existsSync(weightsPath)) {
+        console.log(`${weightsPath} not found.`);
+        process.exit(1);
+    }
 
     // delete old if exists
     exec('gh release delete trained-model -y', {}, true);
 
-    /**
-     * @returns A list of all files related to trained model.
-     */
-    const releaseFiles = () => {
-        return fs.readdirSync('./saved')
-            .map(file => `./saved/${file}`)
-            .join(' ') + ' ';
-    };
-
+    // create a git release
     exec(
         'gh release create trained-model ' + 
-        releaseFiles() +
+        `${modelPath} ${weightsPath} `+
         '--title "Latest trained model files" ' + 
         '--latest=false --target=main --notes ""');
+
+    /* eslint-disable-next-line */
+    const admin = require('firebase-admin');
+    const accessKeyPath = process.argv.pop();
+    const serviceAccount = JSON.parse(fs.readFileSync(accessKeyPath));
+    
+    // upload to firebase
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        storageBucket: 'gs://aimr-model-storage.appspot.com'
+    });
+
+    const bucket = admin.storage().bucket();
+
+    /**
+     * Helper function to upload to firebase storage bucket.
+     */
+    const uploadFile = async filename => {
+        await bucket.upload(filename, {
+            gzip: true,
+            metadata: {
+                cacheControl: 'public, no-cache',
+            },
+        });
+        console.log(`${filename} uploaded to Firebase Storage.`);
+    };
+    await uploadFile('./saved/weights.bin');
+    await uploadFile('./saved/model.json');
 });
 
 registerCommand('test.lib', () => {
