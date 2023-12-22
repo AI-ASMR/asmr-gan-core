@@ -26,7 +26,7 @@ Documentation can be found at [ai-asmr.github.io/asmr-gan-core](https://ai-asmr.
 
 ### Model architecture. <a id="model"></a>
 
-<img src="./assets/model.png">
+<img src="https://raw.githubusercontent.com/AI-ASMR/asmr-gan-core/main/assets/model.png">
 
 ### Getting started. <a id="getting-started"></a>
 
