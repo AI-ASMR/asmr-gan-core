@@ -519,14 +519,6 @@ registerCommand('publish.model', async () => {
     await uploadFile('./saved/model.json');
 });
 
-registerCommand('test.lib', () => {
-    console.log('todo');
-});
-
-registerCommand('test.bin', () => {
-    console.log('todo');
-});
-
 /**
  *  @note Helper functions defined below.
  * 
