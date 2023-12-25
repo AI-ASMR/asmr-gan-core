@@ -165,8 +165,7 @@ function loadDataset() {
                 fs.writeFileSync(fileName, data);
             };
 
-            // merges a list of tensors slow by gradually disposing
-            // them to prevent a run out of memory error.
+            // merges all given tensors into one
             const mergeTensors = (tensors: tf.Tensor[]) => {
                 console.log('shuffling tensors...');
                 tf.util.shuffle(tensors);
