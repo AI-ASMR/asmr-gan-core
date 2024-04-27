@@ -1,3 +1,4 @@
+import Model from '@common/model';
 /**
  * @warning
  * 
@@ -13,7 +14,6 @@
  * instance (depending on the version of tensorflow they import.)
  */
 import tf from '@tensorflow/tfjs';
-import Model from '@common/model';
 
 /**
  * @example
@@ -87,7 +87,12 @@ export default class AiMR_GAN {
         if(this.loaded && this.cached) {
             throw new Error('Refused to cache, model already cached.');
         }
-        await this.model.save('indexeddb://gan');
+        try {
+            await this.model.save('indexeddb://gan');
+        }
+        catch {
+            console.warn('Could not cache model to indexeddb.');
+        }
     }
 
     /**
