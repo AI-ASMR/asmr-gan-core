@@ -74,6 +74,13 @@ sudo docker pull stiliyankushev/aimr-asmr-gan:latest
 # run the docker instance (pass arguments at the end)
 sudo docker run --gpus all -ti stiliyankushev/aimr-asmr-gan:latest --help
 ```
+Full example of docker usage:
+```shell
+# assuming the training data is at "/home/kushev/Documents/training-data"
+sudo docker run --mount src="/home/kushev/Documents",target="/home",type=bind \
+--gpus all -ti stiliyankushev/aimr-asmr-gan:latest \
+-i /home/training-data -d /home/dataset.bin -c /home/checkpoints -p /home/preview.png -q 10000 -s 512
+```
 
 #### (Optional) Docker Prerequisites.
 Running the above docker container will automatically use a version of tensorflow that makes use of native C bindings. It'll also try to take advantage of any CUDA enabled GPUs running on the system. The docker container already pre-configures Cuda and Cudnn to work with tensorflow js. What you need to do is have:
